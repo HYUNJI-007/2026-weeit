@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wee-It 2026</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='16' fill='%2334a853'/%3E%3Ccircle cx='49' cy='16' r='5' fill='%23fbbc04'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-size='22' font-family='Arial,sans-serif' font-weight='700' fill='white'%3EWee%3C/text%3E%3C/svg%3E">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        :root {
+            --primary: #34a853;
+            --primary-dark: #2d9249;
+            --accent: #fbbc04;
+            --bg: #fcfcf9;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #334155;
+            --text-sub: #64748b;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding-bottom: 50px;
+            color: var(--text-main);
+        }
+
+        header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 4px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            margin-left: auto;
+        }
+
+        .header-link {
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .header-link img {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+            display: block;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-sub);
+            transition: all 0.2s;
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: #f1f8f3;
+            border-color: var(--primary);
+            color: var(--primary-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f8f3;
+            padding-bottom: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-sub);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            height: 42px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 0 10px;
+            box-sizing: border-box;
+            font-family: inherit;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.1);
+        }
+
+        textarea {
+            height: 120px;
+            padding: 15px;
+            resize: none;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            height: 50px;
+            flex: 2;
+        }
+
+        .btn-save:hover { background: var(--primary-dark); }
+
+        .btn-neis {
+            background: #dff1e5;
+            color: var(--primary-dark);
+            height: 50px;
+            flex: 1;
+            border: 1px solid #bfe0c8;
+        }
+
+        .btn-neis:hover {
+            background: #d2eadb;
+        }
+
+        .stat-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        .stat-table th, .stat-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-table th {
+            background: #f8fafc;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .info-box {
+            background: #f8fff9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+            border-right: 1px solid var(--border);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .info-box strong { color: var(--primary-dark); }
+
+        .chart-container {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .fc .fc-button-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .fc .fc-button-primary:disabled {
+            background-color: #a3d9b1;
+            border-color: #a3d9b1;
+        }
+
+        .fc-daygrid-event {
+            border-radius: 4px;
+            padding: 1px 3px;
+        }
+
+        @media print {
+            .no-print, nav, header, .btn, .card-title button {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+            }
+
+            .stat-table th {
+                background: #eee !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .info-box {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                text-align: left;
+            }
+
+            .header-links {
+                width: 100%;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-left: 0;
+            }
+        }
+
+        .copyright {
+            text-align: center;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-top: 30px;
+            padding: 10px 0 20px;
+            letter-spacing: 0.2px;
+        }
+
+        .case-header {
+            margin-bottom: 10px;
+        }
+
+        .case-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #f1f8f3, #ffffff);
+            color: var(--primary-dark);
+            border: 1px solid #cfe8d6;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(52, 168, 83, 0.08);
+        }
+
+        .case-badge-label {
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .case-badge-number {
+            color: var(--primary-dark);
+            letter-spacing: 0.3px;
+        }
+
+        .attachment-box {
+            margin-top: 14px;
+            padding: 14px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .attachment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .attachment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            flex-wrap: wrap;
+        }
+
+        .attachment-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .attachment-name {
+            font-weight: 700;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .attachment-sub {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .attachment-empty {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .link-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eef6ff;
+            color: #1d4ed8;
+            text-decoration: none;
+            font-size: 0.83rem;
+            font-weight: 700;
+            margin: 4px 6px 0 0;
+        }
+
+        body.locked {
+            overflow: hidden;
+        }
+
+        #lockScreen {
+            position: fixed;
+            inset: 0;
+            background: rgba(252, 252, 249, 0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+        }
+
+        #lockScreen.hidden {
+            display: none;
+        }
+
+        .lock-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 30px 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .lock-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .lock-sub {
+            font-size: 0.92rem;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+        }
+
+        .lock-input {
+            height: 48px;
+            font-size: 1rem;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .lock-error {
+            min-height: 20px;
+            font-size: 0.85rem;
+            color: #dc2626;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body class="locked">
+<div id="lockScreen">
+    <div class="lock-card">
+        <div class="lock-title">🔒 Wee-It 2026</div>
+        <div class="lock-sub">암호를 입력해주세요.</div>
+        <input
+            type="password"
+            id="lockPassword"
+            class="lock-input"
+            placeholder="암호 입력"
+            autocomplete="off"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();unlockApp();}"
+        >
+        <button type="button" class="btn btn-save" style="width:100%;" onclick="unlockApp()">암호 해제</button>
+        <div id="lockError" class="lock-error"></div>
+    </div>
+</div>
+
+<header class="no-print">
+    <div class="header-title">
+        <h1 style="margin:0; display: flex; align-items: center; gap: 10px; color: var(--text-main);">
+            <span style="color: var(--accent); font-size: 0.9em;">♥</span>
+            Wee-It 2026
+            <span style="color: var(--accent); font-size: 0.9em;">♥</span>
+        </h1>
+        <small style="color:var(--primary-dark); font-weight:bold; margin-top: 4px;">경기도구리남양주교육지원청 Wee센터</small>
+    </div>
+    <div class="header-links">
+        <a href="https://docs.google.com/spreadsheets/d/1QAFntUfI4Spq-O3oLbIWbMUjPTNHKVOSmaKoEoqcx54/edit?gid=0#gid=0" target="_blank" class="header-link">
+            <span style="font-size: 1.05em;">🗃️</span>
+            <span>Wee DB</span>
+        </a>
+        <a href="https://drive.google.com/drive/folders/1-xx6wdycxamPft46y_xGhud11wHwQIGH?usp=drive_link" target="_blank" class="header-link">
+            <span style="font-size: 1.05em;">📁</span>
+            <span>Drive</span>
+        </a>
+    </div>
+</header>
+
+<div class="container">
+    <nav class="no-print">
+        <button class="nav-btn active" onclick="showPage('regPage', this)">📝 상담기록</button>
+        <button class="nav-btn" onclick="showPage('casePage', this)">🗂️ 사례관리</button>
+        <button class="nav-btn" onclick="showPage('statPage', this)">📊 실적통계</button>
+        <button class="nav-btn" onclick="showPage('calPage', this)">📅 일정달력</button>
+    </nav>
+
+    <div id="regPage" class="page active">
+        <form id="mainForm">
+            <input type="hidden" name="rowNum" id="rowNum">
+
+            <div class="card">
+                <div class="card-title">상담자 정보</div>
+                <div class="input-group">
+                    <label>상담자 성명</label>
+                    <input type="text" name="counselor" id="counselorName" oninput="saveCounselor(this.value)" required placeholder="성명을 입력하세요">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">내담자 정보</div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>성명</label>
+                        <input type="text" name="name" id="stdName" list="studentList" oninput="autoComplete(this.value)" required autocomplete="off">
+                        <datalist id="studentList"></datalist>
+                    </div>
+                    <div class="input-group">
+                        <label>학교</label>
+                        <input type="text" name="school" id="school">
+                    </div>
+                    <div class="input-group">
+                        <label>학년/반/성별</label>
+                        <div style="display:flex; gap:5px;">
+                            <input type="text" name="grade" id="grade" placeholder="학년" style="flex:1;">
+                            <input type="text" name="classNum" id="classNum" placeholder="반" style="flex:1;">
+                            <select name="gender" id="gender" style="flex:1.2;">
+                                <option>남</option>
+                                <option>여</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>생년월일</label>
+                        <input type="text" name="birth" id="birth" placeholder="YYMMDD">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>내담자 연락처</label>
+                        <input type="text" name="phone" id="phone" placeholder="010-0000-0000">
+                    </div>
+                    <div class="input-group">
+                        <label>학부모 연락처</label>
+                        <input type="text" name="parentPhone" id="parentPhone" placeholder="010-0000-0000">
+                    </div>
+                    <div class="input-group">
+                        <label>사례번호</label>
+                        <input type="text" name="caseNum" id="caseNum" value="2026-" oninput="updateNeisTitle(); generateAutoSummary();">
+                    </div>
+                    <div class="input-group">
+                        <label>회기</label>
+                        <input type="number" name="session" id="session" value="1" oninput="updateNeisTitle(); generateAutoSummary();">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">상담 일시 및 유형</div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>상담 날짜</label>
+                        <input type="date" name="date" id="currDate">
+                    </div>
+                    <div class="input-group">
+                        <label>상담 시간</label>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <input type="time" id="startTime" name="startTime" oninput="autoSetEndTime()">
+                            <span style="color: var(--text-sub)">~</span>
+                            <input type="time" id="endTime" name="endTime">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>상담 매체</label>
+                        <select name="media" id="media">
+                            <option>면담</option>
+                            <option>전화상담</option>
+                            <option>사이버상담</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>대분류</label>
+                        <select name="big" id="bigS" onchange="updateMid()"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>중분류</label>
+                        <select name="mid" id="midS" onchange="updateSmall()"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>소분류</label>
+                        <select name="small" id="smallS" onchange="generateAutoSummary()"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border: 2px solid var(--accent); background: #fffdf5;">
+                <div class="card-title" style="color: #d19a00;">📅 다음 상담 약속</div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="input-group">
+                        <label>다음 상담 날짜</label>
+                        <input type="date" name="nextDate" id="nextDate" style="border-color: #f5e0a3;">
+                    </div>
+                    <div class="input-group">
+                        <label>다음 상담 시간</label>
+                        <input type="time" name="nextTime" id="nextTime" style="border-color: #f5e0a3;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">상담 내용 기록</div>
+                <div class="input-group" style="margin-bottom:12px;">
+                    <label>🏷️ 나이스 제목 (자동 생성)</label>
+                    <input type="text" name="neisTitle" id="neisTitle" style="background: #f8fafc;">
+                </div>
+                <div class="input-group" style="margin-bottom:12px;">
+                    <label>📝 나이스 요약 (자동 생성)</label>
+                    <textarea name="neisContent" id="neisContent" style="height:60px; background: #f8fafc;"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>📒 상세 상담 내용 (구글 시트 저장용)</label>
+                    <textarea name="content" id="mainContent" placeholder="상세한 상담 내용을 기록하세요."></textarea>
+                </div>
+
+                <div class="attachment-box">
+                    <label for="attachments">📎 첨부파일</label>
+                    <input type="hidden" name="existingAttachments" id="existingAttachments">
+                    <input type="file" id="attachments" multiple style="margin-top:8px; padding:8px; height:auto;">
+                    <div class="attachment-sub" style="margin-top:6px;">여러 파일을 한 번에 선택할 수 있습니다. 수정 시 기존 첨부도 유지되며, 개별 삭제가 가능합니다.</div>
+                    <div id="attachmentPreview" class="attachment-list"></div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:20px; flex-wrap: wrap;">
+                    <button type="submit" id="saveBtn" class="btn btn-save">💾 저장</button>
+                    <button type="button" onclick="location.reload()" class="btn" style="background:#e2e8f0; color:#475569; height:50px; flex:0.5;">🍀 취소</button>
+                    <button type="button" onclick="exportToNeis()" class="btn btn-neis">📥 나이스 파일</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="casePage" class="page">
+        <div class="card no-print">
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="searchName" placeholder="내담자 이름을 입력하세요." style="flex:1;">
+                <button class="btn" onclick="searchHistory()" style="background:var(--accent); color:#856404;">조회</button>
+            </div>
+        </div>
+        <div class="card no-print" id="rosterCard">
+            <div class="card-title">
+                <span>👥 내담자 명단 <span id="rosterCount" style="font-size:0.8rem; color:var(--text-sub); font-weight:600;"></span></span>
+                <span style="display:flex; gap:8px; align-items:center;">
+                    <select id="rosterSort" onchange="renderCaseRoster()" style="width:auto; height:34px; font-size:0.8rem;">
+                        <option value="recent">최근 상담순</option>
+                        <option value="name">이름순</option>
+                    </select>
+                    <button type="button" id="rosterToggle" class="btn" onclick="toggleRoster()" style="background:#f1f8f3; color:var(--primary-dark); border:1px solid #bfe0c8; font-size:0.8rem; padding:7px 12px;">▲ 접기</button>
+                </span>
+            </div>
+            <div id="rosterList" class="roster-grid"></div>
+        </div>
+        <div id="historyTarget"></div>
+    </div>
+
+    <div id="statPage" class="page">
+        <div class="card">
+            <div class="card-title">
+                통계 현황
+                <button class="btn no-print" onclick="printStatReport()" style="background:#64748b; color:white; font-size:0.8rem; padding: 8px 15px;">🖨️ 통계 보고서 인쇄</button>
+            </div>
+            <div class="chart-container"><canvas id="statChart"></canvas></div>
+            <div id="statResult"></div>
+        </div>
+    </div>
+
+    <div id="calPage" class="page">
+        <div class="card">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+
+<div id="clientInfoModal" class="no-print" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:24px; width:90%; max-width:420px; max-height:85vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+        <div class="card-title" style="margin-bottom:4px;">✏️ 내담자 인적사항 수정</div>
+        <p style="color:var(--text-sub); font-size:0.8rem; margin:0 0 16px;">여기서 수정하면 이 내담자의 모든 상담기록에 함께 반영됩니다.</p>
+        <input type="hidden" id="editInfoOriginalName">
+        <div class="form-grid">
+            <div class="input-group">
+                <label>성명</label>
+                <input type="text" id="editInfoName">
+            </div>
+            <div class="input-group">
+                <label>학교</label>
+                <input type="text" id="editInfoSchool">
+            </div>
+            <div class="input-group">
+                <label>학년/반/성별</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="editInfoGrade" placeholder="학년" style="flex:1;">
+                    <input type="text" id="editInfoClassNum" placeholder="반" style="flex:1;">
+                    <select id="editInfoGender" style="flex:1.2;">
+                        <option>남</option>
+                        <option>여</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>생년월일</label>
+                <input type="text" id="editInfoBirth" placeholder="YYMMDD">
+            </div>
+            <div class="input-group">
+                <label>내담자 연락처</label>
+                <input type="text" id="editInfoPhone" placeholder="010-0000-0000">
+            </div>
+            <div class="input-group">
+                <label>학부모 연락처</label>
+                <input type="text" id="editInfoParentPhone" placeholder="010-0000-0000">
+            </div>
+            <div class="input-group">
+                <label>사례번호</label>
+                <input type="text" id="editInfoCaseNum" placeholder="2026-">
+            </div>
+        </div>
+        <div id="editInfoStatus" style="font-size:0.85rem; color:var(--text-sub); margin-top:10px; min-height:18px;"></div>
+        <div style="display:flex; gap:10px; margin-top:16px;">
+            <button type="button" class="btn" style="flex:1; background:#64748b; color:#fff;" onclick="closeClientInfoEdit()">취소</button>
+            <button type="button" id="saveClientInfoBtn" class="btn btn-save" style="flex:1;" onclick="saveClientInfoEdit()">저장</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxz1xkkWsVfv0GsTzyN9xv2OGlMpyo6LCr4SLjc0Tosyfm36s71yhAAdqrVAsaqn1zqrA/exec';
+
+    let db = [];
+    let calendar;
+    let chart;
+    let existingAttachments = [];
+
+    const APP_PASSWORD = '0627';
+    const APP_TIMEZONE = 'Asia/Seoul';
+
+    const COL = {
+        NAME: 0,
+        SCHOOL: 1,
+        GRADE: 2,
+        CLASS_NUM: 3,
+        GENDER: 4,
+        BIRTH: 5,
+        PHONE: 6,
+        PARENT_PHONE: 7,
+        COUNSELOR: 8,
+        CASE_NUM: 9,
+        BIG: 10,
+        MID: 11,
+        SMALL: 12,
+        DATE: 13,
+        START_TIME: 14,
+        END_TIME: 15,
+        SESSION: 16,
+        NEIS_TITLE: 17,
+        CONTENT: 18,
+        NEIS_CONTENT: 19,
+        NEXT_APPOINTMENT: 20,
+        MEDIA: 22,
+        ATTACHMENTS: 23
+    };
+
+    const categories = {
+        "상담": {
+            "개인상담": ["학업", "진로", "성격", "성", "대인관계", "가정 및 가족관계", "일탈 및 비행", "학교폭력 가해", "학교폭력 피해", "자해 및 자살", "정신건강", "컴퓨터 및 스마트폰 과사용", "정보제공", "기타"],
+            "집단상담": ["학업", "진로", "학교폭력", "성격/대인관계", "기타"],
+            "학부모상담": ["학생관련상담", "교사관련상담", "학습", "기타"]
+        },
+        "검사": {
+            "심리검사": ["개인심리검사", "집단심리검사", "기타"]
+        },
+        "자문": {
+            "교원자문": ["학교학습", "사회성발달", "정서발달", "진로발달", "행동발달", "기타"]
+        },
+        "교육": {
+            "프로그램운영": ["사회성발달", "인성발달", "학습발달", "진로발달", "행동발달", "기타"],
+            "연수": ["교직원 상담연수", "학부모 상담연수"]
+        },
+        "연구": {
+            "자기계발": ["상담연수참석", "상담모범학교방문", "외부강연", "신문/잡지 기고", "기타"],
+            "직무계발": ["상담프로그램개발", "상담 연간계획서작성", "기타"]
+        },
+        "의뢰": {
+            "교내외의뢰": ["외부전문가에게 상담의뢰", "교내 교사에게 상담의뢰", "기타"]
+        }
+    };
+
+    function pad2(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    function isBlank(value) {
+        if (value === null || value === undefined) return true;
+        const s = String(value).trim();
+        return s === '' || s === 'undefined' || s === 'null';
+    }
+
+    function isNumberLike(value) {
+        if (isBlank(value)) return false;
+        return !isNaN(Number(String(value).trim()));
+    }
+function formatDateObj(date) {
+    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+
+    const parts = new Intl.DateTimeFormat('ko-KR', {
+        timeZone: APP_TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(date);
+
+    const y = parts.find(p => p.type === 'year')?.value;
+    const m = parts.find(p => p.type === 'month')?.value;
+    const d = parts.find(p => p.type === 'day')?.value;
+
+    return (y && m && d) ? `${y}-${m}-${d}` : '';
+}
+
+    function formatTimeObj(date) {
+        if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+
+        const parts = new Intl.DateTimeFormat('ko-KR', {
+            timeZone: APP_TIMEZONE,
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23'
+        }).formatToParts(date);
+
+        const h = parts.find(p => p.type === 'hour')?.value;
+        const m = parts.find(p => p.type === 'minute')?.value;
+
+        return (h && m) ? `${h}:${m}` : '';
+    }
+
+    function formatSerialDate(serial) {
+        const num = Number(serial);
+        if (isNaN(num)) return '';
+
+        // 구글시트/엑셀 serial date에 시간이 함께 섞여 들어오면
+        // Math.round 때문에 오후 일정이 다음 날로 밀릴 수 있으므로
+        // 날짜 부분만 분리해서 UTC 기준으로 처리한다.
+        const wholeDays = Math.floor(num);
+        const excelEpochUtc = Date.UTC(1899, 11, 30);
+        const date = new Date(excelEpochUtc + wholeDays * 86400000);
+
+        if (isNaN(date.getTime())) return '';
+
+        const y = date.getUTCFullYear();
+        const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const d = String(date.getUTCDate()).padStart(2, '0');
+
+        return `${y}-${m}-${d}`;
+    }
+
+function getTodayLocalStr() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+    function parseMeridiemTime(raw) {
+        if (isBlank(raw)) return '';
+        const s = String(raw).trim();
+
+        let match = s.match(/(오전|오후)\s*(\d{1,2})(?::(\d{1,2}))?/);
+        if (match) {
+            let hour = Number(match[2]);
+            const min = Number(match[3] || 0);
+
+            if (match[1] === '오후' && hour < 12) hour += 12;
+            if (match[1] === '오전' && hour === 12) hour = 0;
+
+            return `${pad2(hour)}:${pad2(min)}`;
+        }
+
+        match = s.match(/(\d{1,2})(?::(\d{1,2}))?\s*([AP]M)/i);
+        if (match) {
+            let hour = Number(match[1]);
+            const min = Number(match[2] || 0);
+            const meridiem = match[3].toUpperCase();
+
+            if (meridiem === 'PM' && hour < 12) hour += 12;
+            if (meridiem === 'AM' && hour === 12) hour = 0;
+
+            return `${pad2(hour)}:${pad2(min)}`;
+        }
+
+        match = s.match(/([AP]M)\s*(\d{1,2})(?::(\d{1,2}))?/i);
+        if (match) {
+            let hour = Number(match[2]);
+            const min = Number(match[3] || 0);
+            const meridiem = match[1].toUpperCase();
+
+            if (meridiem === 'PM' && hour < 12) hour += 12;
+            if (meridiem === 'AM' && hour === 12) hour = 0;
+
+            return `${pad2(hour)}:${pad2(min)}`;
+        }
+
+        return '';
+    }
+
+function cleanDateStr(value) {
+    if (value === null || value === undefined) return '';
+
+    if (value instanceof Date) {
+        return formatDateObj(value);
+    }
+
+    const raw = String(value).trim();
+    if (!raw || raw === 'undefined' || raw === 'null') return '';
+
+    // Google Sheets / Apps Script가 날짜를 UTC ISO 문자열로 내려주면
+    // 예: 2026-04-27T15:00:00.000Z === 한국시간 2026-04-28 00:00
+    // 이 경우 문자열 앞부분만 자르면 하루 전날로 보이므로,
+    // 반드시 Date 객체로 파싱한 뒤 로컬 날짜로 변환한다.
+    const hasTimezoneInfo = /Z$|GMT|UTC|[+-]\d{2}:?\d{2}$/i.test(raw);
+    if (/[T\s]/.test(raw) && hasTimezoneInfo) {
+        const parsed = new Date(raw);
+        if (!isNaN(parsed.getTime())) {
+            return formatDateObj(parsed);
+        }
+    }
+
+    // 이미 YYYY-MM-DD 형식
+    const isoDateOnly = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoDateOnly) {
+        return `${isoDateOnly[1]}-${isoDateOnly[2]}-${isoDateOnly[3]}`;
+    }
+
+    // YYYY-MM-DDTHH:mm:ss / YYYY-MM-DD 09:00:00 등 (타임존 정보 없는 로컬 문자열)
+    const isoLike = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+    if (isoLike) {
+        return `${isoLike[1]}-${String(isoLike[2]).padStart(2, '0')}-${String(isoLike[3]).padStart(2, '0')}`;
+    }
+
+    // 2026. 4. 27. / 2026/4/27 / 2026-4-27
+    const dotted = raw.match(/^(\d{2,4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
+    if (dotted) {
+        let year = dotted[1];
+        if (year.length === 2) year = `20${year}`;
+        return `${year}-${String(dotted[2]).padStart(2, '0')}-${String(dotted[3]).padStart(2, '0')}`;
+    }
+
+    // 숫자형 serial date
+    const num = Number(raw);
+    if (!isNaN(num) && num >= 1) {
+        return formatSerialDate(num);
+    }
+
+    return '';
+}
+
+
+    function cleanTimeStr(value) {
+        if (isBlank(value)) return '';
+
+        if (value instanceof Date) {
+            return formatTimeObj(value);
+        }
+
+        const raw = String(value).trim();
+
+        if (isNumberLike(raw)) {
+            const num = Number(raw);
+            if (num >= 0) return formatSerialTime(num);
+            return '';
+        }
+
+        const meridiemTime = parseMeridiemTime(raw);
+        if (meridiemTime) return meridiemTime;
+
+        if (
+            raw.includes(':') &&
+            (
+                raw.includes('T') ||
+                /GMT|UTC|Z$/i.test(raw) ||
+                /\d{4}[.\-/]\s*\d{1,2}[.\-/]\s*\d{1,2}/.test(raw)
+            )
+        ) {
+            const normalized = raw.replace('오전', 'AM').replace('오후', 'PM');
+            const date = new Date(normalized);
+            if (!isNaN(date.getTime())) {
+                return formatTimeObj(date);
+            }
+        }
+
+        const timeMatch = raw.match(/(\d{1,2}):(\d{1,2})/);
+        if (timeMatch) {
+            return `${pad2(timeMatch[1])}:${pad2(timeMatch[2])}`;
+        }
+
+        return '';
+    }
+
+    function splitDateTime(value) {
+        if (isBlank(value)) {
+            return { date: '', time: '' };
+        }
+
+        return {
+            date: cleanDateStr(value),
+            time: cleanTimeStr(value)
+        };
+    }
+
+    function formatGradeDisplay(value) {
+        const raw = String(value == null ? '' : value).trim();
+        if (!raw) return '-';
+        if (raw === '해당없음' || raw === '혼합') return raw;
+        return raw.includes('학년') ? raw : `${raw}학년`;
+    }
+
+    function formatNextAppointment(raw) {
+        if (isBlank(raw)) return '미정';
+        const { date, time } = splitDateTime(raw);
+        return [date, time].filter(Boolean).join(' ') || String(raw);
+    }
+
+    function getRecordDateTimeMs(row) {
+        const date = cleanDateStr(row[COL.DATE]);
+        const time = cleanTimeStr(row[COL.START_TIME]) || '00:00';
+
+        if (!date) return 0;
+
+        const dt = new Date(`${date}T${time}:00`);
+        const ms = dt.getTime();
+        return isNaN(ms) ? 0 : ms;
+    }
+
+    function unlockApp() {
+        const input = document.getElementById('lockPassword');
+        const error = document.getElementById('lockError');
+
+        if (!input) return;
+
+        if (input.value === APP_PASSWORD) {
+            document.body.classList.remove('locked');
+            document.getElementById('lockScreen').classList.add('hidden');
+            error.textContent = '';
+        } else {
+            error.textContent = '암호가 올바르지 않습니다.';
+            input.value = '';
+            input.focus();
+        }
+    }
+
+    function updateMid() {
+        const b = document.getElementById('bigS').value;
+        const mS = document.getElementById('midS');
+        mS.innerHTML = '';
+
+        if (categories[b]) {
+            Object.keys(categories[b]).forEach(m => {
+                mS.add(new Option(m, m));
+            });
+        }
+
+        updateSmall();
+    }
+
+    function updateSmall() {
+        const b = document.getElementById('bigS').value;
+        const m = document.getElementById('midS').value;
+        const sS = document.getElementById('smallS');
+        sS.innerHTML = '';
+
+        if (categories[b] && categories[b][m]) {
+            categories[b][m].forEach(s => {
+                sS.add(new Option(s, s));
+            });
+        }
+
+        if (typeof generateAutoSummary === 'function') {
+            generateAutoSummary();
+        }
+    }
+
+    window.onload = () => {
+        const savedCounselor = localStorage.getItem('wee_counselor');
+        if (savedCounselor) {
+            document.getElementById('counselorName').value = savedCounselor;
+        }
+
+        const bS = document.getElementById('bigS');
+        Object.keys(categories).forEach(b => bS.add(new Option(b, b)));
+        updateMid();
+
+        document.getElementById('currDate').value = getTodayLocalStr();
+        updateNeisTitle();
+        generateAutoSummary();
+
+        loadData();
+
+        const searchInput = document.getElementById('searchName');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchHistory();
+                }
+            });
+        }
+
+        const lockInput = document.getElementById('lockPassword');
+        if (lockInput) lockInput.focus();
+    };
+
+    function saveCounselor(v) {
+        localStorage.setItem('wee_counselor', v);
+    }
+
+    function loadData() {
+        return fetch(scriptURL)
+            .then(r => r.json())
+            .then(data => {
+                if (!Array.isArray(data)) {
+                    throw new Error('불러온 데이터 형식이 배열이 아닙니다.');
+                }
+
+                db = data
+                    .map((r, idx) => {
+                        if (Array.isArray(r)) {
+                            r.rowNum = idx + 1;
+                        }
+                        return r;
+                    })
+                    .slice(1);
+
+                updateHelpers();
+                renderStats();
+                initCalendar();
+                if (typeof syncCardsFromRemote === 'function') syncCardsFromRemote();
+                if (typeof renderCaseRoster === 'function') renderCaseRoster();
+            })
+            .catch(err => {
+                console.error('loadData 오류:', err);
+                alert('데이터를 불러오지 못했습니다. 구글 스크립트 응답을 확인해주세요.');
+            });
+    }
+
+    function autoComplete(name) {
+        const records = db.filter(r => r[COL.NAME] === name);
+
+        if (records.length > 0) {
+            const last = records[records.length - 1];
+
+            document.getElementById('school').value = last[COL.SCHOOL] || '';
+            document.getElementById('grade').value = last[COL.GRADE] || '';
+            document.getElementById('classNum').value = last[COL.CLASS_NUM] || '';
+            document.getElementById('gender').value = last[COL.GENDER] || '남';
+            document.getElementById('birth').value = last[COL.BIRTH] || '';
+            document.getElementById('phone').value = last[COL.PHONE] || '';
+            document.getElementById('parentPhone').value = last[COL.PARENT_PHONE] || '';
+            document.getElementById('caseNum').value = last[COL.CASE_NUM] || '2026-';
+            document.getElementById('session').value = Number(last[COL.SESSION] || 0) + 1;
+        } else {
+            document.getElementById('school').value = '';
+            document.getElementById('grade').value = '';
+            document.getElementById('classNum').value = '';
+            document.getElementById('gender').value = '남';
+            document.getElementById('birth').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('parentPhone').value = '';
+            document.getElementById('caseNum').value = '2026-';
+            document.getElementById('session').value = 1;
+        }
+
+        updateNeisTitle();
+        generateAutoSummary();
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function safeParseAttachments(raw) {
+        if (!raw) return [];
+
+        let parsed = raw;
+
+        if (typeof raw === 'string') {
+            try {
+                parsed = JSON.parse(raw);
+            } catch (e) {
+                return [];
+            }
+        }
+
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+            .filter(item => item && typeof item === 'object')
+            .map(item => ({
+                name: String(item.name || ''),
+                url: String(item.url || ''),
+                fileId: String(item.fileId || ''),
+                mimeType: String(item.mimeType || '')
+            }))
+            .filter(item => item.name || item.url || item.fileId);
+    }
+
+    function readFileAsBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                const result = String(reader.result || '');
+                resolve({
+                    name: file.name,
+                    mimeType: file.type || 'application/octet-stream',
+                    base64: result.includes(',') ? result.split(',')[1] : result
+                });
+            };
+
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removeNewAttachment(idx) {
+        const input = document.getElementById('attachments');
+        const files = Array.from(input.files || []);
+        files.splice(idx, 1);
+
+        const dt = new DataTransfer();
+        files.forEach(file => dt.items.add(file));
+        input.files = dt.files;
+
+        renderAttachmentPreview();
+    }
+
+    function removeExistingAttachment(idx) {
+        existingAttachments.splice(idx, 1);
+        renderAttachmentPreview();
+    }
+
+    function renderAttachmentPreview() {
+        const target = document.getElementById('attachmentPreview');
+        const input = document.getElementById('attachments');
+        const files = Array.from(input.files || []);
+
+        document.getElementById('existingAttachments').value = JSON.stringify(existingAttachments);
+
+        let html = '';
+
+        if (existingAttachments.length > 0) {
+            html += `<div class="attachment-sub">기존 첨부파일</div>`;
+            html += existingAttachments.map((file, idx) => `
+                <div class="attachment-item">
+                    <div class="attachment-meta">
+                        <div class="attachment-name">${escapeHtml(file.name || '첨부파일')}</div>
+                        <div class="attachment-sub">${escapeHtml(file.mimeType || '저장된 파일')}</div>
+                    </div>
+                    <div class="attachment-actions">
+                        ${file.url ? `<a class="btn" href="${escapeHtml(file.url)}" target="_blank" style="background:#e0f2fe; color:#0369a1; padding:8px 12px;">열기</a>` : ''}
+                        <button type="button" class="btn" onclick="removeExistingAttachment(${idx})" style="background:#fee2e2; color:#b91c1c; padding:8px 12px;">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        if (files.length > 0) {
+            html += `<div class="attachment-sub" style="margin-top:${existingAttachments.length ? '10px' : '0'};">새로 추가할 파일</div>`;
+            html += files.map((file, idx) => `
+                <div class="attachment-item">
+                    <div class="attachment-meta">
+                        <div class="attachment-name">${escapeHtml(file.name || `파일 ${idx + 1}`)}</div>
+                        <div class="attachment-sub">${escapeHtml(file.type || '파일 형식 미확인')} · ${Math.round((file.size || 0) / 1024)}KB</div>
+                    </div>
+                    <div class="attachment-actions">
+                        <button type="button" class="btn" onclick="removeNewAttachment(${idx})" style="background:#fee2e2; color:#b91c1c; padding:8px 12px;">제외</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        target.innerHTML = html || '<div class="attachment-empty">첨부된 파일이 없습니다.</div>';
+    }
+    function buildAttachmentLinks(raw) {
+        const items = safeParseAttachments(raw).filter(it => !(typeof isConsentFile === 'function' && isConsentFile(it.name)));
+        if (items.length === 0) return '';
+
+        return `
+            <tr>
+                <th>첨부파일</th>
+                <td colspan="3" style="text-align:left; padding:12px 15px; background:#fff;">
+                    ${items.map(item => item.url
+                        ? `<a class="link-chip" href="${escapeHtml(item.url)}" target="_blank">📎 ${escapeHtml(item.name || '첨부파일')}</a>`
+                        : `<span class="link-chip" style="background:#f1f5f9; color:#475569;">📎 ${escapeHtml(item.name || '첨부파일')}</span>`
+                    ).join('')}
+                </td>
+            </tr>
+        `;
+    }
+
+    function prepareEdit(idx) {
+        if (!confirm('이 기록을 수정하시겠습니까? 상담기록 탭으로 이동합니다.')) return;
+
+        const r = db[idx];
+        if (!r) return;
+
+        document.getElementById('rowNum').value = r.rowNum || '';
+
+        document.getElementById('stdName').value = r[COL.NAME] || '';
+        document.getElementById('school').value = r[COL.SCHOOL] || '';
+        document.getElementById('grade').value = r[COL.GRADE] || '';
+        document.getElementById('classNum').value = r[COL.CLASS_NUM] || '';
+        document.getElementById('gender').value = r[COL.GENDER] || '남';
+        document.getElementById('birth').value = r[COL.BIRTH] || '';
+        document.getElementById('phone').value = r[COL.PHONE] || '';
+        document.getElementById('parentPhone').value = r[COL.PARENT_PHONE] || '';
+        document.getElementById('counselorName').value = r[COL.COUNSELOR] || '';
+        document.getElementById('caseNum').value = r[COL.CASE_NUM] || '2026-';
+
+        document.getElementById('bigS').value = r[COL.BIG] || Object.keys(categories)[0];
+        updateMid();
+        document.getElementById('midS').value = r[COL.MID] || '';
+        updateSmall();
+        document.getElementById('smallS').value = r[COL.SMALL] || '';
+
+        document.getElementById('currDate').value = cleanDateStr(r[COL.DATE]);
+        document.getElementById('startTime').value = cleanTimeStr(r[COL.START_TIME]);
+        document.getElementById('endTime').value = cleanTimeStr(r[COL.END_TIME]);
+
+        document.getElementById('session').value = r[COL.SESSION] || 1;
+        document.getElementById('neisTitle').value = r[COL.NEIS_TITLE] || '';
+        document.getElementById('mainContent').value = r[COL.CONTENT] || '';
+        document.getElementById('neisContent').value = r[COL.NEIS_CONTENT] || '';
+
+        const nextInfo = splitDateTime(r[COL.NEXT_APPOINTMENT]);
+        document.getElementById('nextDate').value = nextInfo.date || '';
+        document.getElementById('nextTime').value = nextInfo.time || '';
+
+        document.getElementById('media').value = r[COL.MEDIA] || '면담';
+
+        existingAttachments = safeParseAttachments(r[COL.ATTACHMENTS]);
+        document.getElementById('attachments').value = '';
+        renderAttachmentPreview();
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = false;
+        saveBtn.innerText = '📝 수정하여 저장';
+        saveBtn.style.background = '#166534';
+
+        showPage('regPage', document.querySelectorAll('.nav-btn')[0]);
+        window.scrollTo(0, 0);
+    }
+
+    function updateNeisTitle() {
+        const c = document.getElementById('caseNum').value;
+        const s = document.getElementById('session').value;
+        document.getElementById('neisTitle').value = (c && s) ? `${c}-${s}` : '';
+    }
+
+    function generateAutoSummary() {
+        const mid = document.getElementById('midS').value;
+        const small = document.getElementById('smallS').value;
+        const session = document.getElementById('session').value;
+
+        document.getElementById('neisContent').value =
+            (mid && small) ? `${mid}(${small}) 주제로 제 ${session}회기 상담함.` : '';
+    }
+
+    function autoSetEndTime() {
+        const s = document.getElementById('startTime').value;
+        if (!s) return;
+
+        const [h, m] = s.split(':').map(Number);
+        const d = new Date();
+        d.setHours(h, m + 40, 0, 0);
+
+        document.getElementById('endTime').value = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
+
+    function toTemplateGrade(value) {
+        const raw = String(value == null ? '' : value).trim();
+        if (!raw) return '해당없음';
+        if (raw === '해당없음' || raw === '혼합') return raw;
+
+        const match = raw.match(/\d+/);
+        if (match) {
+            const n = Number(match[0]);
+            if (n >= 1 && n <= 6) return `${n}학년`;
+        }
+
+        return raw;
+    }
+
+    function toTemplateGender(value) {
+        const raw = String(value == null ? '' : value).trim();
+        if (raw === '남' || raw === '여' || raw === '혼성') return raw;
+        return raw || '';
+    }
+
+    function calcCounselTimeParts(startValue, endValue) {
+        const startStr = cleanTimeStr(startValue || '00:00');
+        const endStr = cleanTimeStr(endValue || '00:00');
+
+        const start = startStr.split(':').map(Number);
+        const end = endStr.split(':').map(Number);
+
+        let totalMinutes = (end[0] * 60 + end[1]) - (start[0] * 60 + start[1]);
+        if (isNaN(totalMinutes) || totalMinutes < 0) totalMinutes = 0;
+
+        return {
+            hour: Math.floor(totalMinutes / 60),
+            min: totalMinutes % 60
+        };
+    }
+
+    function buildReferenceSheetData() {
+        const rows = [];
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '상담분류', null]);
+        rows.push([null, '전문상담', null]);
+        rows.push([null, '순회상담', null]);
+
+        rows.push([null, null, null]);
+
+        rows.push([null, 'Wee설치여부', null]);
+        rows.push([null, 'Wee클래스', null]);
+        rows.push([null, '일반', null]);
+        rows.push([null, 'Wee센터', null]);
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '대분류', null]);
+        Object.keys(categories).forEach(big => {
+            rows.push([null, big, null]);
+        });
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '중분류 상위 대분류', '중분류']);
+        Object.keys(categories).forEach(big => {
+            let first = true;
+            Object.keys(categories[big]).forEach(mid => {
+                rows.push([first ? big : null, mid, null]);
+                first = false;
+            });
+        });
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '상담구분 상위 중분류', '상담구분']);
+        Object.keys(categories).forEach(big => {
+            Object.keys(categories[big]).forEach(mid => {
+                let first = true;
+                categories[big][mid].forEach(small => {
+                    rows.push([first ? mid : null, small, null]);
+                    first = false;
+                });
+            });
+        });
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '학년', null]);
+        rows.push([null, '해당없음', null]);
+        rows.push([null, '1학년', null]);
+        rows.push([null, '2학년', null]);
+        rows.push([null, '3학년', null]);
+        rows.push([null, '4학년', null]);
+        rows.push([null, '5학년', null]);
+        rows.push([null, '6학년', null]);
+        rows.push([null, '혼합', null]);
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '성별', null]);
+        rows.push([null, '남', null]);
+        rows.push([null, '여', null]);
+        rows.push([null, '혼성', null]);
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '상담사소속', null]);
+        rows.push([null, '전문상담교사', null]);
+        rows.push([null, '전문상담순회교사', null]);
+        rows.push([null, 'Wee카운슬러', null]);
+        rows.push([null, '학생상담자원봉사자', null]);
+        rows.push([null, '교사', null]);
+        rows.push([null, '전문상담사', null]);
+        rows.push([null, '사회복지사', null]);
+        rows.push([null, '교육복지사', null]);
+        rows.push([null, '임상심리사', null]);
+        rows.push([null, '그외', null]);
+
+        rows.push([null, null, null]);
+
+        rows.push([null, '상담매체구분', null]);
+        rows.push([null, '면담', null]);
+        rows.push([null, '전화상담', null]);
+        rows.push([null, '사이버상담', null]);
+
+        return rows;
+    }
+
+    function exportToNeis() {
+        if (db.length === 0) {
+            alert('데이터가 없습니다.');
+            return;
+        }
+
+        const headers = [
+            '*상담분류',
+            '*Wee설치여부',
+            '*대분류',
+            '*중분류',
+            '*상담구분',
+            '*상담인원',
+            '*학년도',
+            '*상담일자',
+            '학년',
+            '성별',
+            '*상담제목',
+            '*상담내용',
+            '*상담시간(시)',
+            '*상담시간(분)',
+            '*상담사소속',
+            '*상담매체구분',
+            '피상담학교'
+        ];
+
+        const inputRows = db.map(r => {
+            const caseNum = String(r[COL.CASE_NUM] || '').trim().toUpperCase();
+            const counselType = caseNum.includes('R') ? '순회상담' : '전문상담';
+
+            const timeParts = calcCounselTimeParts(r[COL.START_TIME], r[COL.END_TIME]);
+            const dateRaw = cleanDateStr(r[COL.DATE]);
+            const uploadDate = dateRaw ? dateRaw.replace(/-/g, '') : '';
+
+            const gradeValue = toTemplateGrade(r[COL.GRADE]);
+            const genderValue = toTemplateGender(r[COL.GENDER]);
+
+            const neisTitle = String(r[COL.NEIS_TITLE] || `${r[COL.CASE_NUM] || ''}-${r[COL.SESSION] || ''}`).trim();
+            const neisContent = String(r[COL.NEIS_CONTENT] || r[COL.CONTENT] || '').trim();
+
+            return [
+                counselType,
+                'Wee센터',
+                r[COL.BIG] || '',
+                r[COL.MID] || '',
+                r[COL.SMALL] || '',
+                '1',
+                '2026',
+                uploadDate,
+                gradeValue,
+                genderValue,
+                neisTitle,
+                neisContent,
+                String(timeParts.hour),
+                String(timeParts.min),
+                '전문상담순회교사',
+                r[COL.MEDIA] || '면담',
+                r[COL.SCHOOL] || ''
+            ];
+        });
+
+        const wb = XLSX.utils.book_new();
+
+        const inputWs = XLSX.utils.aoa_to_sheet([headers, ...inputRows]);
+        inputWs['!cols'] = [
+            { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 18 },
+            { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 8 },
+            { wch: 18 }, { wch: 40 }, { wch: 12 }, { wch: 12 }, { wch: 16 },
+            { wch: 14 }, { wch: 20 }
+        ];
+        XLSX.utils.book_append_sheet(wb, inputWs, '입력');
+
+        const refWs = XLSX.utils.aoa_to_sheet(buildReferenceSheetData());
+        refWs['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 20 }];
+        XLSX.utils.book_append_sheet(wb, refWs, '참조');
+
+        XLSX.writeFile(wb, '상담관리_업로드서식_2026.xlsx');
+    }
+
+    const SIGNATURE_STAMP = `data:image/png;base64,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`;
+
+    function printReport(idx) {
+        const r = db[idx];
+        if (!r) return;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const content = `
+        <html>
+        <head>
+            <title>개인상담기록지</title>
+            <style>
+                @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+                body { font-family: 'Pretendard', sans-serif; padding: 12px; color: black; }
+                h1 { text-align: center; text-decoration: underline; margin-bottom: 18px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 12px; table-layout: fixed; }
+                th, td { border: 1px solid black; padding: 10px; text-align: center; font-size: 11pt; word-break: break-all; }
+                th { background: #f2f2f2; width: 15%; font-weight: bold; }
+                .content-box { border: 1px solid black; min-height: 500px; padding: 14px; text-align: left; white-space: pre-wrap; font-size: 11pt; line-height: 1.6; }
+                .footer { text-align: right; margin-top: 18px; font-weight: bold; font-size: 12pt; }
+                @page { size: A4; margin: 10mm; }
+            </style>
+        </head>
+        <body>
+            <h1>개 인 상 담 기 록 지</h1>
+            <table>
+                <tr>
+                    <th>내담자</th><td>${r[COL.NAME] || ''}</td>
+                    <th>학교/학년</th><td>${r[COL.SCHOOL] || ''} / ${formatGradeDisplay(r[COL.GRADE])}</td>
+                    <th>회기</th><td>제 ${r[COL.SESSION] || ''}회기</td>
+                </tr>
+                <tr>
+                    <th>상담자</th><td>${r[COL.COUNSELOR] || ''}</td>
+                    <th>상담일시</th><td colspan="3">${cleanDateStr(r[COL.DATE])} (${cleanTimeStr(r[COL.START_TIME])} ~ ${cleanTimeStr(r[COL.END_TIME])})</td>
+                </tr>
+                <tr>
+                    <th>상담유형</th><td colspan="3">${r[COL.BIG] || ''} > ${r[COL.MID] || ''} (${r[COL.SMALL] || ''})</td>
+                    <th>상담매체</th><td>${r[COL.MEDIA] || '-'}</td>
+                </tr>
+            </table>
+
+            <div class="content-box"><strong>[상담 내용]</strong><br><br>${String(r[COL.CONTENT] || '').replaceAll('\n', '<br>')}</div>
+
+            <table style="margin-top:-1px;">
+                <tr>
+                    <th style="width:20%">다음 상담 약속</th>
+                    <td style="text-align:left; padding-left:15px;">${formatNextAppointment(r[COL.NEXT_APPOINTMENT])}</td>
+                </tr>
+            </table>
+
+            <div class="footer">상담자 : ${r[COL.COUNSELOR] || ''} <span style="display:inline-block; position:relative; width:24px; height:20px; vertical-align:middle; margin-left:2px;"><span style="position:relative; z-index:1;">(인)</span><img id="printSignature" src="${SIGNATURE_STAMP}" alt="서명" style="position:absolute; left:50%; top:52%; transform:translate(-50%, -50%); width:30px; height:30px; object-fit:contain; opacity:0.95;"></span></div>
+        </body>
+        </html>
+        `;
+
+        printWindow.document.write(content);
+        printWindow.document.close();
+
+        const signImg = printWindow.document.getElementById('printSignature');
+        const doPrint = () => {
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        };
+
+        if (signImg && !signImg.complete) {
+            signImg.onload = () => setTimeout(doPrint, 150);
+            signImg.onerror = () => setTimeout(doPrint, 150);
+        } else {
+            setTimeout(doPrint, 300);
+        }
+    }
+
+    function printStatReport() {
+        try {
+            if (!db || db.length === 0) {
+                alert('인쇄할 통계 데이터가 없습니다.');
+                return;
+            }
+
+            const printWindow = window.open('', '_blank', 'width=1000,height=800');
+            if (!printWindow) {
+                alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.');
+                return;
+            }
+
+            const now = new Date();
+            const printDateTime = now.toLocaleString('ko-KR');
+            const counselor = localStorage.getItem('wee_counselor') || '-';
+
+            const bigLabels = Object.keys(categories);
+            const totalCount = db.length;
+
+            const summaryRows = bigLabels.map(big => {
+                const count = db.filter(r => r[COL.BIG] === big).length;
+                return `
+                    <tr>
+                        <th>${big}</th>
+                        <td>${count}건</td>
+                    </tr>
+                `;
+            }).join('');
+
+            let detailRows = '';
+
+            bigLabels.forEach(big => {
+                const bigRecords = db.filter(r => r[COL.BIG] === big);
+                const mids = Object.keys(categories[big]);
+
+                const bigRowCount = mids.reduce((sum, mid) => {
+                    return sum + categories[big][mid].length;
+                }, 0);
+
+                detailRows += `
+                    <tr class="section-row">
+                        <td colspan="3">● ${big} 총계</td>
+                        <td>${bigRecords.length}건</td>
+                    </tr>
+                `;
+
+                let bigRendered = false;
+
+                mids.forEach(mid => {
+                    const midRecords = bigRecords.filter(r => r[COL.MID] === mid);
+                    const smalls = categories[big][mid];
+                    const midRowCount = smalls.length;
+
+                    smalls.forEach((small, idx) => {
+                        const smallCount = midRecords.filter(r => r[COL.SMALL] === small).length;
+
+                        detailRows += `<tr>`;
+
+                        if (!bigRendered) {
+                            detailRows += `
+                                <td rowspan="${bigRowCount}" style="vertical-align: middle; font-weight: 700; background: #fff;">
+                                    ${big}
+                                </td>
+                            `;
+                            bigRendered = true;
+                        }
+
+                        if (idx === 0) {
+                            detailRows += `
+                                <td rowspan="${midRowCount}" style="vertical-align: middle; font-weight: 600; background: #fcfcf9;">
+                                    ${mid}
+                                </td>
+                            `;
+                        }
+
+                        detailRows += `
+                            <td style="text-align:left; padding-left:10px;">${small}</td>
+                            <td>${smallCount}</td>
+                        </tr>
+                        `;
+                    });
+                });
+            });
+
+            const content = `
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>상담 실적 통계 보고서</title>
+    <style>
+        @page { size: A4; margin: 10mm; }
+
+        body {
+            font-family: sans-serif;
+            padding: 12px;
+            color: black;
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+
+        h1 {
+            text-align: center;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            font-size: 20pt;
+        }
+
+        .sub-title {
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 11pt;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 9px;
+            text-align: center;
+            font-size: 10.5pt;
+            word-break: break-word;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .org-name {
+            font-size: 9pt;
+            line-height: 1.25;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin: 18px 0 8px;
+            font-size: 11.5pt;
+        }
+
+        .section-row td {
+            background: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .section-row td:first-child {
+            text-align: left;
+            padding-left: 12px;
+        }
+
+        .footer {
+            text-align: right;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+
+        .note {
+            margin-top: 8px;
+            font-size: 10pt;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>상 담 실 적 통 계 보 고 서</h1>
+    <div class="sub-title">경기도구리남양주교육지원청 Wee센터</div>
+
+    <table>
+        <tr>
+            <th style="width:18%;">기관명</th>
+            <td class="org-name" style="width:32%;">경기도구리남양주교육지원청 Wee센터</td>
+            <th style="width:18%;">출력일시</th>
+            <td style="width:32%;">${printDateTime}</td>
+        </tr>
+        <tr>
+            <th>작성자</th>
+            <td>${counselor}</td>
+            <th>총 건수</th>
+            <td>${totalCount}건</td>
+        </tr>
+    </table>
+
+    <div class="section-title">1. 대분류별 실적 요약</div>
+    <table>
+        <tr>
+            <th style="width:55%;">대분류</th>
+            <th style="width:45%;">건수</th>
+        </tr>
+        ${summaryRows}
+    </table>
+
+    <div class="section-title">2. 세부 실적 현황</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width:18%;">대분류</th>
+                <th style="width:24%;">중분류</th>
+                <th style="width:42%;">소분류</th>
+                <th style="width:16%;">건수</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${detailRows}
+        </tbody>
+    </table>
+
+    <div class="note">※ 본 보고서는 Wee-It 2026 시스템에 저장된 상담 데이터를 기준으로 자동 출력되었습니다.</div>
+    <div class="footer">작성자 : ${counselor} <span style="display:inline-block; position:relative; width:24px; height:20px; vertical-align:middle; margin-left:2px;"><span style="position:relative; z-index:1;">(인)</span><img id="statSignature" src="${SIGNATURE_STAMP}" alt="서명" style="position:absolute; left:50%; top:52%; transform:translate(-50%, -50%); width:30px; height:30px; object-fit:contain; opacity:0.95;"></span></div>
+</body>
+</html>
+            `;
+
+            printWindow.document.open();
+            printWindow.document.write(content);
+            printWindow.document.close();
+
+            const statSignImg = printWindow.document.getElementById('statSignature');
+            const doStatPrint = () => {
+                printWindow.focus();
+                printWindow.print();
+            };
+
+            if (statSignImg && !statSignImg.complete) {
+                statSignImg.onload = () => setTimeout(doStatPrint, 150);
+                statSignImg.onerror = () => setTimeout(doStatPrint, 150);
+            } else {
+                setTimeout(doStatPrint, 300);
+            }
+
+            printWindow.onafterprint = function () {
+                printWindow.close();
+            };
+
+        } catch (err) {
+            console.error('printStatReport 오류:', err);
+            alert('통계 보고서 인쇄 중 오류가 발생했습니다.');
+        }
+    }
+
+    function searchHistory(targetName = null) {
+        const name = targetName || document.getElementById('searchName').value.trim();
+        if (!name) return;
+
+        document.getElementById('searchName').value = name;
+
+        const records = db.filter(r => r[COL.NAME] === name).sort((a, b) => {
+            const timeA = getRecordDateTimeMs(a);
+            const timeB = getRecordDateTimeMs(b);
+
+            if (timeA !== timeB) return timeB - timeA;
+            return Number(b.rowNum || 0) - Number(a.rowNum || 0);
+        });
+
+        const target = document.getElementById('historyTarget');
+
+        if (records.length === 0) {
+            target.innerHTML = '<div class="card">기록이 없습니다.</div>';
+            return;
+        }
+
+        const info = records[0];
+
+        let h = `
+            <div class="case-header">
+                <div class="case-badge">
+                    <span class="case-badge-label">사례번호</span>
+                    <span class="case-badge-number">${info[COL.CASE_NUM] || '-'}</span>
+                </div>
+                <button type="button" class="btn no-print" onclick="openCareCard('${escapeHtml(name)}')" style="margin-left:8px; background:#fff; color:var(--primary-dark); border:1.5px solid var(--primary); font-size:0.8rem; padding:8px 14px; border-radius:999px;">📇 기록물 관리카드</button>
+            </div>
+
+            <div class="info-box" style="position:relative;">
+                <button type="button" class="btn no-print" onclick="openClientInfoEdit('${escapeHtml(name)}')" style="position:absolute; top:12px; right:12px; background:var(--primary); color:#fff; font-size:0.75rem; padding:6px 12px;">✏️ 인적사항 수정</button>
+                <div><strong>성명:</strong> ${info[COL.NAME] || ''} (${info[COL.GENDER] || '-'})</div>
+                <div><strong>생년월일:</strong> ${info[COL.BIRTH] || '-'}</div>
+                <div><strong>학교:</strong> ${info[COL.SCHOOL] || '-'}</div>
+                <div><strong>학년/반:</strong> ${info[COL.GRADE] || '-'}학년 ${info[COL.CLASS_NUM] || '-'}반</div>
+                <div><strong>내담자 연락처:</strong> ${info[COL.PHONE] || '-'}</div>
+                <div><strong>학부모 연락처:</strong> ${info[COL.PARENT_PHONE] || '-'}</div>
+                <div><strong>진행회기:</strong> 총 ${records.length}회기</div>
+            </div>`;
+
+        records.forEach(r => {
+            const idx = db.indexOf(r);
+            let diaryType = '상담일지';
+
+            if (r[COL.BIG] === '자문') diaryType = '자문일지';
+            else if (r[COL.BIG] === '검사') diaryType = '검사일지';
+            else if (r[COL.BIG] === '교육') diaryType = '교육일지';
+            if (r[COL.MID] === '학부모상담') diaryType = '학부모 상담일지';
+
+            h += `<div class="card">
+                <div class="card-title">
+                    제 ${r[COL.SESSION] || ''}회기 ${diaryType} (${cleanDateStr(r[COL.DATE])})
+                    <div>
+                        <button class="btn no-print" onclick="prepareEdit(${idx})" style="background:var(--primary); color:white; font-size:0.75rem; padding:6px 12px; margin-right:5px;">✏️ 수정</button>
+                        <button class="btn no-print" onclick="printReport(${idx})" style="background:#64748b; color:white; font-size:0.75rem; padding:6px 12px;">🖨️ 기록지 인쇄</button>
+                    </div>
+                </div>
+
+                <table class="stat-table">
+                    <tr>
+                        <th style="width:15%;">상담자</th>
+                        <td style="width:35%;">${r[COL.COUNSELOR] || ''}</td>
+                        <th style="width:15%;">상담일시</th>
+                        <td style="width:35%;">${cleanDateStr(r[COL.DATE])} (${cleanTimeStr(r[COL.START_TIME])} ~ ${cleanTimeStr(r[COL.END_TIME])})</td>
+                    </tr>
+                    <tr>
+                        <th style="width:15%;">상담유형</th>
+                        <td style="width:35%; text-align:left; padding-left:15px;">
+                            ${r[COL.BIG] || ''} > ${r[COL.MID] || ''} (${r[COL.SMALL] || ''})
+                        </td>
+                        <th style="width:15%;">상담매체</th>
+                        <td style="width:35%;">
+                            ${r[COL.MEDIA] || '-'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align:left; padding:20px; white-space:pre-line; min-height:150px; background:#fff; line-height:1.6;">${r[COL.CONTENT] || ''}</td>
+                    </tr>
+                    ${r[COL.NEXT_APPOINTMENT] ? `
+                    <tr>
+                        <th>다음약속</th>
+                        <td colspan="3" style="color:#d19a00; font-weight:bold; text-align:left; padding-left:15px; background:#fffdf5;">
+                            📅 ${formatNextAppointment(r[COL.NEXT_APPOINTMENT])}
+                        </td>
+                    </tr>` : ''}
+                    ${buildAttachmentLinks(r[COL.ATTACHMENTS])}
+                </table>
+            </div>`;
+        });
+
+        target.innerHTML = h;
+    }
+
+    function renderStats() {
+        const canvas = document.getElementById('statChart');
+        if (!canvas) return;
+
+        const bigLabels = Object.keys(categories);
+        const bigCounts = bigLabels.map(label => db.filter(r => r[COL.BIG] === label).length);
+
+        const ctx = canvas.getContext('2d');
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: bigLabels,
+                datasets: [{
+                    data: bigCounts,
+                    backgroundColor: ['#34a853', '#fbbc04', '#4285f4', '#ea4335', '#9c27b0', '#00acc1'],
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+
+        let h = `
+            <table class="stat-table" style="margin-top:20px;">
+                <thead>
+                    <tr>
+                        <th style="width:20%">대분류</th>
+                        <th style="width:25%">중분류</th>
+                        <th style="width:40%">소분류</th>
+                        <th style="width:15%">건수</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        bigLabels.forEach(big => {
+            const bigRecords = db.filter(r => r[COL.BIG] === big);
+            const mids = Object.keys(categories[big]);
+
+            const bigRowCount = mids.reduce((sum, mid) => {
+                return sum + categories[big][mid].length;
+            }, 0);
+
+            h += `
+                <tr style="font-weight:bold; background:#f1f8f3; color:var(--primary-dark);">
+                    <td colspan="3" style="text-align:left; padding-left:15px;">● ${big} 총계</td>
+                    <td>${bigRecords.length}건</td>
+                </tr>
+            `;
+
+            let bigRendered = false;
+
+            mids.forEach(mid => {
+                const midRecords = bigRecords.filter(r => r[COL.MID] === mid);
+                const smalls = categories[big][mid];
+                const midRowCount = smalls.length;
+
+                smalls.forEach((small, idx) => {
+                    const smallCount = midRecords.filter(r => r[COL.SMALL] === small).length;
+
+                    h += `<tr>`;
+
+                    if (!bigRendered) {
+                        h += `
+                            <td rowspan="${bigRowCount}" style="vertical-align: middle; font-weight: 700; background: #fff;">
+                                ${big}
+                            </td>
+                        `;
+                        bigRendered = true;
+                    }
+
+                    if (idx === 0) {
+                        h += `
+                            <td rowspan="${midRowCount}" style="vertical-align: middle; font-weight: 600; background: #fcfcf9;">
+                                ${mid}
+                            </td>
+                        `;
+                    }
+
+                    h += `
+                        <td style="text-align:left; padding-left:10px;">${small}</td>
+                        <td>${smallCount}</td>
+                    </tr>
+                    `;
+                });
+            });
+        });
+
+        h += `</tbody></table>`;
+        document.getElementById('statResult').innerHTML = h;
+    }
+
+    function initCalendar() {
+        const eventData = [];
+        const completedDates = new Set();
+
+        db.forEach(r => {
+            const date = cleanDateStr(r[COL.DATE]);
+            if (date) {
+                eventData.push({
+                    title: `${cleanTimeStr(r[COL.START_TIME])} ${r[COL.NAME]}`,
+                    start: date,
+                    color: '#34a853',
+                    extendedProps: { name: r[COL.NAME] }
+                });
+                completedDates.add(`${r[COL.NAME]}|${date}`);
+            }
+        });
+
+        db.forEach(r => {
+            if (r[COL.NEXT_APPOINTMENT]) {
+                const nextDate = cleanDateStr(r[COL.NEXT_APPOINTMENT]);
+                if (nextDate && !completedDates.has(`${r[COL.NAME]}|${nextDate}`)) {
+                    eventData.push({
+                        title: `[예약] ${r[COL.NAME]}`,
+                        start: nextDate,
+                        color: '#fbbc04',
+                        textColor: '#856404',
+                        extendedProps: { name: r[COL.NAME] }
+                    });
+                }
+            }
+        });
+
+        const calendarEl = document.getElementById('calendar');
+        if (!calendarEl) return;
+
+        if (calendar) calendar.destroy();
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ko',
+            height: 650,
+            events: eventData,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            eventClick: function(info) {
+                const targetName = info.event.extendedProps.name;
+                if (targetName) {
+                    const caseBtn = document.querySelectorAll('.nav-btn')[1];
+                    showPage('casePage', caseBtn);
+                    document.getElementById('searchName').value = targetName;
+                    searchHistory(targetName);
+                    window.scrollTo(0, 0);
+                }
+            }
+        });
+
+        calendar.render();
+    }
+
+    function updateHelpers() {
+        const studentList = document.getElementById('studentList');
+        if (studentList) {
+            studentList.innerHTML = [...new Set(db.map(r => r[COL.NAME]).filter(Boolean))]
+                .map(n => `<option value="${escapeHtml(n)}">`)
+                .join('');
+        }
+    }
+
+    function showPage(id, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const page = document.getElementById(id);
+        if (page) page.classList.add('active');
+
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+
+        if (id === 'casePage' && typeof renderCaseRoster === 'function') renderCaseRoster();
+
+        if (id === 'calPage' && calendar) {
+            setTimeout(() => calendar.render(), 100);
+        }
+
+        if (id === 'statPage') {
+            setTimeout(() => {
+                if (chart) {
+                    chart.resize();
+                } else {
+                    renderStats();
+                }
+            }, 100);
+        }
+    }
+    const attachmentInput = document.getElementById('attachments');
+    if (attachmentInput) {
+        attachmentInput.addEventListener('change', renderAttachmentPreview);
+    }
+
+    renderAttachmentPreview();
+
+    function openClientInfoEdit(name) {
+        const records = db.filter(r => r[COL.NAME] === name);
+        if (records.length === 0) return;
+
+        const latest = records.slice().sort((a, b) => {
+            const timeA = getRecordDateTimeMs(a);
+            const timeB = getRecordDateTimeMs(b);
+            if (timeA !== timeB) return timeB - timeA;
+            return Number(b.rowNum || 0) - Number(a.rowNum || 0);
+        })[0];
+
+        document.getElementById('editInfoOriginalName').value = name;
+        document.getElementById('editInfoName').value = latest[COL.NAME] || '';
+        document.getElementById('editInfoSchool').value = latest[COL.SCHOOL] || '';
+        document.getElementById('editInfoGrade').value = latest[COL.GRADE] || '';
+        document.getElementById('editInfoClassNum').value = latest[COL.CLASS_NUM] || '';
+        document.getElementById('editInfoGender').value = latest[COL.GENDER] || '남';
+        document.getElementById('editInfoBirth').value = latest[COL.BIRTH] || '';
+        document.getElementById('editInfoPhone').value = latest[COL.PHONE] || '';
+        document.getElementById('editInfoParentPhone').value = latest[COL.PARENT_PHONE] || '';
+        document.getElementById('editInfoCaseNum').value = latest[COL.CASE_NUM] || '2026-';
+        document.getElementById('editInfoStatus').textContent = '';
+
+        document.getElementById('clientInfoModal').style.display = 'flex';
+    }
+
+    function closeClientInfoEdit() {
+        document.getElementById('clientInfoModal').style.display = 'none';
+    }
+
+    function buildClientInfoUpdatePayload(r, overrides) {
+        const nextInfo = splitDateTime(r[COL.NEXT_APPOINTMENT]);
+
+        return {
+            rowNum: r.rowNum || '',
+            counselor: r[COL.COUNSELOR] || '',
+            name: overrides.name,
+            school: overrides.school,
+            grade: overrides.grade,
+            classNum: overrides.classNum,
+            gender: overrides.gender,
+            birth: overrides.birth,
+            phone: overrides.phone,
+            parentPhone: overrides.parentPhone,
+            caseNum: overrides.caseNum,
+            session: r[COL.SESSION] || '',
+            date: cleanDateStr(r[COL.DATE]),
+            startTime: cleanTimeStr(r[COL.START_TIME]),
+            endTime: cleanTimeStr(r[COL.END_TIME]),
+            media: r[COL.MEDIA] || '면담',
+            big: r[COL.BIG] || '',
+            mid: r[COL.MID] || '',
+            small: r[COL.SMALL] || '',
+            nextDate: nextInfo.date || '',
+            nextTime: nextInfo.time || '',
+            neisTitle: r[COL.NEIS_TITLE] || '',
+            neisContent: r[COL.NEIS_CONTENT] || '',
+            content: r[COL.CONTENT] || '',
+            existingAttachments: JSON.stringify(safeParseAttachments(r[COL.ATTACHMENTS])),
+            attachments: []
+        };
+    }
+
+    async function saveClientInfoEdit() {
+        const originalName = document.getElementById('editInfoOriginalName').value;
+        const overrides = {
+            name: document.getElementById('editInfoName').value.trim(),
+            school: document.getElementById('editInfoSchool').value.trim(),
+            grade: document.getElementById('editInfoGrade').value.trim(),
+            classNum: document.getElementById('editInfoClassNum').value.trim(),
+            gender: document.getElementById('editInfoGender').value,
+            birth: document.getElementById('editInfoBirth').value.trim(),
+            phone: document.getElementById('editInfoPhone').value.trim(),
+            parentPhone: document.getElementById('editInfoParentPhone').value.trim(),
+            caseNum: document.getElementById('editInfoCaseNum').value.trim()
+        };
+
+        if (!overrides.name) {
+            alert('성명을 입력해주세요.');
+            return;
+        }
+
+        const records = db.filter(r => r[COL.NAME] === originalName);
+        if (records.length === 0) {
+            alert('해당 내담자의 기록을 찾을 수 없습니다.');
+            return;
+        }
+
+        if (!confirm(`이 내담자의 모든 상담기록(${records.length}건)에 수정된 인적사항이 반영됩니다. 계속하시겠습니까?`)) {
+            return;
+        }
+
+        const btn = document.getElementById('saveClientInfoBtn');
+        const statusEl = document.getElementById('editInfoStatus');
+        btn.disabled = true;
+
+        let successCount = 0;
+        try {
+            for (let i = 0; i < records.length; i++) {
+                statusEl.textContent = `저장 중... (${i + 1}/${records.length})`;
+
+                const payload = buildClientInfoUpdatePayload(records[i], overrides);
+
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || `${i + 1}번째 기록 저장 중 오류가 발생했습니다.`);
+                }
+                successCount++;
+            }
+
+            records.forEach(r => {
+                r[COL.NAME] = overrides.name;
+                r[COL.SCHOOL] = overrides.school;
+                r[COL.GRADE] = overrides.grade;
+                r[COL.CLASS_NUM] = overrides.classNum;
+                r[COL.GENDER] = overrides.gender;
+                r[COL.BIRTH] = overrides.birth;
+                r[COL.PHONE] = overrides.phone;
+                r[COL.PARENT_PHONE] = overrides.parentPhone;
+                r[COL.CASE_NUM] = overrides.caseNum;
+            });
+            if (typeof migrateCardName === 'function') migrateCardName(originalName, overrides.name);
+            updateHelpers();
+
+            alert(`✅ ${successCount}건의 기록에 인적사항이 반영되었습니다.`);
+            closeClientInfoEdit();
+            searchHistory(overrides.name);
+        } catch (err) {
+            console.error('인적사항 일괄 수정 오류:', err);
+            alert(`${successCount}건 저장 후 오류가 발생했습니다: ${err.message || err}`);
+        } finally {
+            btn.disabled = false;
+            statusEl.textContent = '';
+        }
+    }
+
+    document.getElementById('mainForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('saveBtn');
+        const isEditMode = !!document.getElementById('rowNum').value;
+        const defaultBtnText = isEditMode ? '📝 수정하여 저장' : '💾 저장';
+
+        btn.disabled = true;
+        btn.innerText = '저장 중...';
+
+        try {
+            const data = Object.fromEntries(new FormData(this).entries());
+            const files = Array.from(document.getElementById('attachments').files || []);
+
+            data.existingAttachments = JSON.stringify(existingAttachments);
+            data.attachments = await Promise.all(files.map(readFileAsBase64));
+
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || '저장 중 오류가 발생했습니다.');
+            }
+
+            alert(result.message || '💾 저장이 완료되었습니다.');
+
+            const form = document.getElementById('mainForm');
+            form.reset();
+
+            document.getElementById('rowNum').value = '';
+            document.getElementById('currDate').value = getTodayLocalStr();
+            document.getElementById('caseNum').value = '2026-';
+            document.getElementById('session').value = 1;
+            document.getElementById('gender').value = '남';
+            document.getElementById('media').value = '면담';
+
+            const savedCounselor = localStorage.getItem('wee_counselor');
+            if (savedCounselor) {
+                document.getElementById('counselorName').value = savedCounselor;
+            }
+
+            const bS = document.getElementById('bigS');
+            if (bS.options.length > 0) {
+                bS.selectedIndex = 0;
+                updateMid();
+            }
+
+            updateNeisTitle();
+            generateAutoSummary();
+
+            existingAttachments = [];
+            renderAttachmentPreview();
+
+            btn.disabled = false;
+            btn.innerText = '💾 저장';
+            btn.style.background = '';
+
+            loadData();
+
+        } catch (err) {
+            console.error('저장 오류:', err);
+            alert(err.message || '오류가 발생했습니다.');
+
+            btn.disabled = false;
+            btn.innerText = defaultBtnText;
+            btn.style.background = isEditMode ? '#166534' : '';
+        }
+    });
+</script>
+
+<!-- ===== 개인상담 기록물 관리카드 (추가 기능) ===== -->
+<style>
+    .cc { width:100%; border-collapse:collapse; table-layout:fixed; margin-bottom:12px; font-size:13px; color:#111; }
+    .cc th, .cc td { border:1px solid #111; padding:5px 7px; text-align:center; vertical-align:middle; word-break:break-all; }
+    .cc th { background:#f2f2f2; font-weight:700; }
+    .cc .band { background:#e5e5e5; font-size:1.05em; }
+    .cc .ttl { font-size:1.35em; font-weight:800; line-height:1.5; background:#fff; }
+    .cc .y { background:#fff8d6; }
+    .cc .l { text-align:left; }
+    .cc .cl { display:inline-block; margin:2px 10px 2px 0; white-space:nowrap; }
+    .cc-note { border:1px solid #111; background:#f2f2f2; padding:8px 12px; font-size:11px; line-height:1.6; font-weight:700; }
+    #careCardBody input[type=text], #careCardBody input[type=date], #careCardBody textarea {
+        height:30px; padding:2px 6px; border:1px solid #cbd5e1; border-radius:4px; font-size:13px; background:#fff; width:100%;
+    }
+    #careCardBody textarea { height:64px; padding:6px; resize:vertical; }
+    #careCardBody input[type=checkbox] { width:auto; height:auto; margin-right:4px; vertical-align:middle; }
+    #careCardBody .cl { cursor:pointer; }
+    #careCardBody input.sm { width:56px; text-align:center; display:inline-block; }
+    #careCardBody input.md { width:60%; display:inline-block; }
+    #careCardBody input.gd { width:42px; display:inline-block; text-align:center; }
+    #careCardBody .auto-hint { font-size:11px; color:#64748b; text-align:left; margin:0 0 8px; }
+    #careCardBody input[type=date] { min-width:128px; }
+    #careCardBody .dtc::before { display:none; }
+    @media (max-width: 720px) {
+        #careCardModal { padding:8px 4px !important; }
+        #careCardBody .cc { border:1px solid #111; border-bottom:none; }
+        #careCardBody .cc, #careCardBody .cc tbody, #careCardBody .cc tr, #careCardBody .cc th, #careCardBody .cc td { display:block; width:100% !important; box-sizing:border-box; }
+        #careCardBody .cc colgroup, #careCardBody .cc .hm { display:none !important; }
+        #careCardBody .cc th, #careCardBody .cc td { border:none; border-bottom:1px solid #111; text-align:left; }
+        #careCardBody .cc th { padding:6px 10px; font-size:12px; }
+        #careCardBody .cc td { padding:8px 10px; }
+        #careCardBody .cc td.ttl, #careCardBody .cc th.band { text-align:center; }
+        #careCardBody .dtc::before { display:block; content:attr(data-label); font-size:12px; font-weight:700; color:#475569; margin-bottom:4px; }
+        #careCardBody input[type=text], #careCardBody input[type=date], #careCardBody textarea { font-size:16px; height:38px; }
+        #careCardBody textarea { height:90px; }
+        #careCardBody input[type=date] { width:100%; min-width:0; }
+        #careCardBody .cl { white-space:normal; margin:5px 14px 5px 0; }
+        #careCardBody input[type=checkbox] { transform:scale(1.25); margin-right:7px; }
+        #careCardBody input.gd { width:58px; }
+        #careCardBody input.sm { width:70px; }
+        #careCardBody input.md { width:70%; }
+        #careCardBody .cc tr.li { display:flex; flex-wrap:wrap; align-items:center; }
+        #careCardBody .cc tr.li td { border-bottom:none; width:auto !important; }
+        #careCardBody .cc tr.li td:nth-child(1) { width:30px !important; padding-right:0; }
+        #careCardBody .cc tr.li td:nth-child(2) { flex:1; min-width:0; }
+        #careCardBody .cc tr.li td:nth-child(3) { width:48px !important; text-align:center; }
+        #careCardBody .cc tr.li td:nth-child(4) { width:100% !important; padding-top:0; border-bottom:1px solid #111; }
+    }
+</style>
+
+<div id="careCardModal" class="no-print" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998; overflow:auto; padding:20px 10px;">
+    <div style="max-width:880px; margin:0 auto; background:#fff; border-radius:14px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px; position:sticky; top:0; background:#fff; padding:6px 0; z-index:2;">
+            <div class="card-title" style="margin:0; border:none; padding:0; flex:1; min-width:160px;">📇 개인상담 기록물 관리카드</div>
+            <button type="button" class="btn btn-save" style="height:40px; flex:none; padding:0 16px;" onclick="saveCareCard()">💾 저장</button>
+            <button type="button" class="btn" style="background:#64748b; color:#fff; height:40px; padding:0 14px;" onclick="printCareCard()">🖨️ 인쇄</button>
+            <button type="button" class="btn" style="background:#f1f8f3; color:var(--primary-dark); border:1px solid #bfe0c8; height:40px; padding:0 14px;" onclick="refillCareAuto()">🔄 자동 항목 다시 채우기</button>
+            <button type="button" class="btn" style="background:#e2e8f0; color:#475569; height:40px; padding:0 14px;" onclick="closeCareCard()">닫기</button>
+        </div>
+        <div id="careCardStatus" style="font-size:0.8rem; color:var(--text-sub); min-height:18px; margin-bottom:8px;"></div>
+        <div id="careCardBody"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const LS_KEY = 'wee_cards_v1';
+    const DEFAULT_SCHOOL = '학교';
+    const CARD_DEFAULTS = {
+        author: '전문상담교사 박현지',
+        location: '',
+        method: '파쇄'
+    };
+    // 상담 영역: 기존 상담기록의 '개인상담' 소분류 목록을 그대로 사용
+    function getAreas() {
+        try { return categories['상담']['개인상담'].slice(); } catch (e) { return ['기타']; }
+    }
+    const LIST_ITEMS = [
+        '학생 상담 신청서 1부',
+        '상담 동의서 및 개인정보수집이용동의서(학생용) 1부',
+        '상담 동의서 및 개인정보수집이용동의서(학부모용) 1부',
+        '상담 사례개념화 1부',
+        '학생 개인상담 기록지',
+        '교사 및 학부모 자문 기록지',
+        '기타 자료'
+    ];
+    // 기록(시트)에서 자동으로 채워지는 항목. 직접 고치면 그 항목은 고정되고, 안 고치면 새 회기가 쌓일 때마다 갱신됩니다.
+    const AUTO_KEYS = ['caseNum', 'school', 'grade', 'classNum', 'gender', 'intakeDate', 'startDate', 'total', 'areas', 'inc2', 'inc3', 'inc5', 'mgmtStart', 'mgmtEnd'];
+
+    let store = loadLocal();
+    let remoteOK = false;
+    let cur = { name: '', v: {}, edited: {}, dirty: false, lastDate: '' };
+
+    function loadLocal() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') || {}; } catch (e) { return {}; }
+    }
+    function saveLocal() {
+        try { localStorage.setItem(LS_KEY, JSON.stringify(store)); return true; } catch (e) { return false; }
+    }
+    function esc(s) { return escapeHtml(s); }
+
+    function defaultsFromStore() {
+        const latest = Object.values(store).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
+        const d = Object.assign({}, CARD_DEFAULTS);
+        if (latest && latest.v) {
+            ['author', 'location', 'method'].forEach(k => { if (latest.v[k]) d[k] = latest.v[k]; });
+        }
+        return d;
+    }
+
+    function computeAuto(name) {
+        const recs = db.filter(r => r[COL.NAME] === name)
+            .map(r => ({ r: r, d: cleanDateStr(r[COL.DATE]) }))
+            .sort((a, b) => (a.d || '9999').localeCompare(b.d || '9999'));
+        if (!recs.length) return { auto: {}, lastDate: '' };
+
+        const personal = recs.filter(x => x.r[COL.MID] === '개인상담');
+        const base = personal.length ? personal : recs;
+        const last = recs[recs.length - 1];
+        const firstAll = recs.find(x => x.d);
+        const firstBase = base.find(x => x.d);
+        const areaList = getAreas();
+        const areas = new Set();
+        base.forEach(x => { const a = x.r[COL.SMALL]; if (a && areaList.includes(a)) areas.add(a); });
+        const caseNum = recs.slice().reverse().map(x => x.r[COL.CASE_NUM]).find(Boolean) || '';
+        const start = firstBase ? firstBase.d : '';
+        const ym = start.match(/^(\d{4})-(\d{2})/);
+        const gender = last.r[COL.GENDER];
+        const cf = (typeof getConsentFiles === 'function') ? getConsentFiles(name) : { student: [], parent: [] };
+
+        const auto = {
+            caseNum: caseNum,
+            school: last.r[COL.SCHOOL] || DEFAULT_SCHOOL,
+            grade: String(last.r[COL.GRADE] || '').replace(/학년$/, ''),
+            classNum: String(last.r[COL.CLASS_NUM] || '').replace(/반$/, ''),
+            gender: (gender === '남' || gender === '여') ? [gender] : [],
+            intakeDate: firstAll ? firstAll.d : '',
+            startDate: start,
+            total: String(base.length),
+            areas: areaList.filter(a => areas.has(a)),
+            inc2: cf.student.length > 0,
+            inc3: cf.parent.length > 0,
+            inc5: true,
+            mgmtStart: ym ? `${ym[1]}. ${+ym[2]}.` : '',
+            mgmtEnd: ym ? `${+ym[1] + 10}. ${+ym[2]}. (10년 보관)` : ''
+        };
+        return { auto: auto, lastDate: last.d || '' };
+    }
+
+    function blankValues() {
+        const v = { mainProblem: '', closeDate: '', route: [], closeReason: [], goal: [], linkStatus: [], linkOrgs: [], linkReason: '', other7: '' };
+        for (let i = 1; i <= 7; i++) { v['inc' + i] = false; v['note' + i] = ''; }
+        return v;
+    }
+
+    function buildValues(name) {
+        const c = computeAuto(name);
+        const saved = store[name];
+        const v = Object.assign(blankValues(), defaultsFromStore(), c.auto);
+        let edited = {};
+        if (saved && saved.v) {
+            edited = Object.assign({}, saved.edited || {});
+            Object.keys(saved.v).forEach(k => {
+                if (!AUTO_KEYS.includes(k) || edited[k]) v[k] = saved.v[k];
+            });
+        }
+        if (!edited.mgmtEnd) {
+            const m = String(v.mgmtStart || '').match(/(\d{4})\D+(\d{1,2})/);
+            if (m) v.mgmtEnd = `${+m[1] + 10}. ${+m[2]}. (10년 보관)`;
+        }
+        v.name = name;
+        return { v: v, edited: edited, lastDate: c.lastDate };
+    }
+
+    function fmtMD(iso) {
+        const m = String(iso || '').match(/^\d{4}-(\d{2})-(\d{2})/);
+        return m ? `${+m[1]}월 ${+m[2]}일` : '월 &nbsp;&nbsp;&nbsp;&nbsp; 일';
+    }
+
+    function renderCard(v, mode) {
+        const edit = mode === 'edit';
+        const tx = (k, cls) => edit
+            ? `<input type="text" data-k="${k}" value="${esc(v[k] || '')}" ${cls ? `class="${cls}"` : ''}>`
+            : esc(v[k] || '');
+        const ta = (k) => edit
+            ? `<textarea data-k="${k}">${esc(v[k] || '')}</textarea>`
+            : `<div class="l" style="white-space:pre-wrap; min-height:${k === 'mainProblem' ? '56px' : '34px'};">${esc(v[k] || '')}</div>`;
+        const dt = (k) => edit
+            ? `<input type="date" data-k="${k}" value="${esc(v[k] || '')}">`
+            : fmtMD(v[k]);
+        const grp = (k, opts, single) => opts.map(o => {
+            const on = (v[k] || []).includes(o);
+            return edit
+                ? `<label class="cl"><input type="checkbox" data-g="${k}" data-single="${single ? 1 : 0}" value="${esc(o)}" ${on ? 'checked' : ''}>${esc(o)}</label>`
+                : `<span class="cl">${on ? '☑' : '☐'} ${esc(o)}</span>`;
+        }).join('');
+        const bx = (k) => edit
+            ? `<input type="checkbox" data-b="${k}" ${v[k] ? 'checked' : ''}>`
+            : (v[k] ? '☑' : '☐');
+
+        const head = `
+        <table class="cc">
+            <colgroup><col style="width:30%"><col style="width:10%"><col style="width:12%"><col style="width:24%"><col style="width:24%"></colgroup>
+            <tr><td class="ttl" rowspan="6">개인상담 기록물<br>관리 카드</td><th class="band" colspan="4">기록물 관리 정보</th></tr>
+            <tr><th colspan="2">기록 작성자</th><td colspan="2">${tx('author')}</td></tr>
+            <tr><th rowspan="2">기록물<br>보관</th><th class="y">시작</th><td class="y" colspan="2">${tx('mgmtStart')}</td></tr>
+            <tr><th>위치</th><td colspan="2">${tx('location')}</td></tr>
+            <tr><th class="y" rowspan="2">종료<br>(폐기)</th><th class="y">일시</th><td class="y" colspan="2">${tx('mgmtEnd')}</td></tr>
+            <tr><th>방법</th><td colspan="2">${tx('method')}</td></tr>
+        </table>`;
+
+        const student = `
+        <table class="cc">
+            <colgroup><col style="width:11%"><col style="width:13%"><col style="width:22%"><col style="width:20%"><col style="width:13%"><col style="width:21%"></colgroup>
+            <tr><th rowspan="2">학생<br>인적사항</th><th>이름</th><td colspan="2"><b>${esc(v.name)}</b></td><th>사례번호</th><td>${tx('caseNum')}</td></tr>
+            <tr><th>소속</th><td>${tx('school')}</td>
+                <td>${edit ? `<input type="text" class="gd" data-k="grade" value="${esc(v.grade || '')}">` : esc(v.grade || '&nbsp;&nbsp;')}학년
+                    ${edit ? `<input type="text" class="gd" data-k="classNum" value="${esc(v.classNum || '')}">` : esc(v.classNum || '&nbsp;&nbsp;')}반</td>
+                <th>성별</th><td>${grp('gender', ['남', '여'], true)}</td></tr>
+        </table>`;
+
+        const progress = `
+        <table class="cc">
+            <colgroup><col style="width:11%"><col style="width:17%"><col style="width:16%"><col style="width:56%"></colgroup>
+            <tr><th rowspan="10">상담<br>진행도</th><th class="hm">과정(일시)</th><th class="hm" colspan="2">내용</th></tr>
+            <tr><th>접수</th><th>신청 경로</th><td class="l">${grp('route', ['자발신청', '의뢰(부모, 교사, 기타)'], true)}</td></tr>
+            <tr><td class="dtc" data-label="접수 일자">${dt('intakeDate')}</td><th>상담 영역</th><td class="l">${grp('areas', getAreas(), false)}</td></tr>
+            <tr><th>시작</th><th>상담 회기</th><td>총 ( ${edit ? `<input type="text" class="sm" data-k="total" value="${esc(v.total || '')}">` : esc(v.total || '&nbsp;&nbsp;&nbsp;')} )회기 진행</td></tr>
+            <tr><td class="dtc" data-label="시작 일자">${dt('startDate')}</td><th>주 호소<br>문제</th><td>${ta('mainProblem')}</td></tr>
+            <tr><th>종결</th><th>종결사유</th><td class="l">${grp('closeReason', ['목표 달성', '졸업', '중도 종결', '외부연계'], true)}</td></tr>
+            <tr><td class="dtc" rowspan="4" data-label="종결 일자">${dt('closeDate')}</td><th>목표 달성<br>여부</th><td class="l">${grp('goal', ['호전', '부분호전', '변화 미미'], true)}</td></tr>
+            <tr><th>연계 여부</th><td class="l">${grp('linkStatus', ['연계 처리', '연계 미처리'], true)}</td></tr>
+            <tr><th>연계 기관</th><td class="l">${grp('linkOrgs', ['청소년상담복지센터', '정신건강복지센터', 'Wee센터', '병의원'], false)}</td></tr>
+            <tr><th>연계 사유</th><td>${ta('linkReason')}</td></tr>
+        </table>`;
+
+        let rows = '';
+        LIST_ITEMS.forEach((t, i) => {
+            const n = i + 1;
+            const label = n === 7 ? `기타 자료( ${tx('other7', 'md')} )` : esc(t);
+            rows += `<tr class="li"><td>${n}</td><td class="l">${label}</td><td>${bx('inc' + n)}</td><td>${tx('note' + n)}</td></tr>`;
+        });
+        const list = `
+        <table class="cc">
+            <colgroup><col style="width:11%"><col style="width:8%"><col style="width:53%"><col style="width:12%"><col style="width:16%"></colgroup>
+            <tr><th rowspan="8">상담<br>기록물<br>목록</th><th class="hm">구분</th><th class="hm">항목</th><th class="hm">포함 여부</th><th class="hm">비고</th></tr>
+            ${rows}
+        </table>`;
+
+        const note = `<div class="cc-note">※ 본 기록물은 상담 운영에 관한 행정적 관리 정보를 기록한 문서이며, 상담의 구체적 내용은 포함하지 않음.<br>&nbsp;&nbsp;&nbsp;&nbsp;기록물 요청 시에는 최소한의 정보(개인상담 기록물 관리카드만)에 한하여 제공함을 원칙으로 함.</div>`;
+        const hint = edit ? `<p class="auto-hint">💡 이름·사례번호·학교·학년/반·성별·접수/시작일·회기 수·상담 영역(기존 소분류)·기록지 포함 여부는 상담기록에서 자동으로 채워졌어요. 직접 고치면 그 값으로 고정됩니다.</p>` : '';
+        return hint + head + student + progress + list + note;
+    }
+
+    function setStatus(msg) {
+        const el = document.getElementById('careCardStatus');
+        if (el) el.textContent = msg;
+    }
+    function baseStatus() {
+        setStatus(remoteOK
+            ? '☁️ 저장하면 구글 시트와 이 브라우저에 함께 저장됩니다.'
+            : '💾 저장하면 이 브라우저에 저장됩니다. (구글 시트 연동은 아직 설정 전)');
+    }
+
+    function bindBody() {
+        const body = document.getElementById('careCardBody');
+        const handler = function (e) {
+            const el = e.target;
+            if (!el || !el.dataset) return;
+            let key = null;
+            if (el.dataset.g) {
+                key = el.dataset.g;
+                let arr;
+                if (el.dataset.single === '1' && el.checked) {
+                    body.querySelectorAll(`input[data-g="${key}"]`).forEach(x => { if (x !== el) x.checked = false; });
+                    arr = [el.value];
+                } else {
+                    arr = Array.from(body.querySelectorAll(`input[data-g="${key}"]:checked`)).map(x => x.value);
+                }
+                cur.v[key] = arr;
+                if (key === 'closeReason' && arr.length && !cur.v.closeDate && cur.lastDate) {
+                    cur.v.closeDate = cur.lastDate;
+                    const d = body.querySelector('input[data-k="closeDate"]');
+                    if (d) d.value = cur.lastDate;
+                }
+            } else if (el.dataset.b) {
+                key = el.dataset.b;
+                cur.v[key] = el.checked;
+            } else if (el.dataset.k) {
+                key = el.dataset.k;
+                cur.v[key] = el.value;
+                if (key === 'mgmtStart' && !cur.edited.mgmtEnd) {
+                    const m = String(el.value).match(/(\d{4})\D+(\d{1,2})/);
+                    if (m) {
+                        cur.v.mgmtEnd = `${+m[1] + 10}. ${+m[2]}. (10년 보관)`;
+                        const t = body.querySelector('input[data-k="mgmtEnd"]');
+                        if (t) t.value = cur.v.mgmtEnd;
+                    }
+                }
+            }
+            if (key) {
+                if (AUTO_KEYS.includes(key)) cur.edited[key] = true;
+                cur.dirty = true;
+            }
+        };
+        body.oninput = handler;
+        body.onchange = handler;
+    }
+
+    function paint() {
+        document.getElementById('careCardBody').innerHTML = renderCard(cur.v, 'edit');
+        bindBody();
+    }
+
+    window.hasCareCard = function (name) { return !!store[name]; };
+
+    window.openCareCard = function (name) {
+        if (!db.some(r => r[COL.NAME] === name)) { alert('해당 내담자의 기록을 찾을 수 없습니다.'); return; }
+        const b = buildValues(name);
+        cur = { name: name, v: b.v, edited: b.edited, dirty: false, lastDate: b.lastDate };
+        paint();
+        baseStatus();
+        document.getElementById('careCardModal').style.display = 'block';
+        document.getElementById('careCardModal').scrollTop = 0;
+    };
+
+    window.closeCareCard = function () {
+        if (cur.dirty && !confirm('저장하지 않은 수정 내용이 있습니다. 닫으시겠어요?')) return;
+        document.getElementById('careCardModal').style.display = 'none';
+    };
+
+    window.refillCareAuto = function () {
+        if (!cur.name) return;
+        if (!confirm('자동으로 채워지는 항목을 상담기록 기준으로 다시 채웁니다.\n(직접 고친 값이 있으면 덮어써집니다. 주 호소 문제 등 직접 쓴 내용은 그대로 둡니다.)')) return;
+        const c = computeAuto(cur.name);
+        cur.edited = {};
+        Object.assign(cur.v, c.auto);
+        cur.lastDate = c.lastDate;
+        cur.dirty = true;
+        paint();
+    };
+
+    async function postCard(name, rec) {
+        const res = await fetch(scriptURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'saveCard', name: name, card: rec })
+        });
+        const j = await res.json();
+        if (!j || !j.success) throw new Error((j && j.message) || '구글 시트 저장 실패');
+    }
+
+    window.saveCareCard = async function () {
+        if (!cur.name) return;
+        const rec = { v: JSON.parse(JSON.stringify(cur.v)), edited: Object.assign({}, cur.edited), updatedAt: Date.now() };
+        store[cur.name] = rec;
+        const localOk = saveLocal();
+        cur.dirty = false;
+        if (remoteOK) {
+            setStatus('저장 중...');
+            try {
+                await postCard(cur.name, rec);
+                setStatus('✅ 저장됨 (구글 시트 + 이 브라우저)');
+            } catch (err) {
+                console.error('관리카드 구글 시트 저장 오류:', err);
+                setStatus('⚠️ 이 브라우저에는 저장했지만 구글 시트 저장에 실패했어요: ' + (err.message || err));
+            }
+        } else {
+            setStatus(localOk
+                ? '✅ 이 브라우저에 저장됨 (구글 시트 연동은 아직 설정 전)'
+                : '⚠️ 저장에 실패했어요. 브라우저 저장소를 확인해주세요.');
+        }
+    };
+
+    window.printCareCard = function () {
+        if (!cur.name) return;
+        const w = window.open('', '_blank');
+        if (!w) { alert('팝업이 차단되어 인쇄 창을 열 수 없습니다.'); return; }
+        const html = `<html><head><title>개인상담 기록물 관리카드</title>
+        <style>
+            @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+            body { font-family:'Pretendard', sans-serif; margin:0; padding:6px; color:#000; }
+            .cc { width:100%; border-collapse:collapse; table-layout:fixed; margin-bottom:12px; font-size:10pt; }
+            .cc th, .cc td { border:1px solid #000; padding:5px 6px; text-align:center; vertical-align:middle; word-break:break-all; }
+            .cc th { background:#f2f2f2; font-weight:700; }
+            .cc .band { background:#e5e5e5; font-size:11pt; }
+            .cc .ttl { font-size:15pt; font-weight:800; line-height:1.6; }
+            .cc .y { background:#fff8d6; }
+            .cc .l { text-align:left; }
+            .cc .cl { display:inline-block; margin:2px 10px 2px 0; white-space:nowrap; }
+            .cc-note { border:1px solid #000; background:#f2f2f2; padding:7px 10px; font-size:8.5pt; line-height:1.6; font-weight:700; }
+            @page { size:A4; margin:12mm; }
+        </style></head><body>${renderCard(cur.v, 'print')}</body></html>`;
+        w.document.write(html);
+        w.document.close();
+        setTimeout(function () { w.focus(); w.print(); w.close(); }, 400);
+    };
+
+    // 이름이 바뀌면 카드도 같이 옮깁니다.
+    window.migrateCardName = function (from, to) {
+        if (!from || !to || from === to || !store[from]) return;
+        store[to] = store[from];
+        delete store[from];
+        saveLocal();
+        if (remoteOK) { postCard(to, store[to]).catch(function (e) { console.error(e); }); }
+    };
+
+    // 구글 시트와 동기화 (Apps Script에 카드 저장 코드가 추가된 경우에만 동작)
+    window.syncCardsFromRemote = async function () {
+        try {
+            const res = await fetch(scriptURL + '?action=getCards');
+            const j = await res.json();
+            if (j && !Array.isArray(j) && j.ok && j.cards) {
+                remoteOK = true;
+                const pushes = [];
+                Object.keys(j.cards).forEach(function (n) {
+                    const rc = j.cards[n];
+                    if (!store[n] || (rc.updatedAt || 0) > (store[n].updatedAt || 0)) store[n] = rc;
+                });
+                Object.keys(store).forEach(function (n) {
+                    const rc = j.cards[n];
+                    if (!rc || (store[n].updatedAt || 0) > (rc.updatedAt || 0)) pushes.push(n);
+                });
+                saveLocal();
+                for (const n of pushes) { try { await postCard(n, store[n]); } catch (e) { console.error(e); } }
+            } else {
+                remoteOK = false;
+            }
+        } catch (e) {
+            remoteOK = false;
+        }
+        const modal = document.getElementById('careCardModal');
+        if (modal && modal.style.display === 'block') baseStatus();
+    };
+})();
+</script>
+<!-- ===== /개인상담 기록물 관리카드 ===== -->
+
+<!-- ===== 사례관리 내담자 명단 (추가 기능) ===== -->
+<style>
+    .roster-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px; }
+    .roster-item { text-align:left; background:#fff; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer; font-family:inherit; transition:all .15s; }
+    .roster-item:hover { border-color:var(--primary); background:#f1f8f3; }
+    .roster-item.active { border-color:var(--primary); background:#e6f4ea; box-shadow:0 0 0 3px rgba(52,168,83,.12); }
+    .roster-name { font-weight:800; color:var(--text-main); font-size:.95rem; }
+    .roster-sub { font-size:.75rem; color:var(--text-sub); margin-top:3px; line-height:1.5; }
+    #rosterList { max-height:300px; overflow-y:auto; padding:2px; }
+    #rosterCard.collapsed #rosterList, #rosterCard.collapsed #rosterSort { display:none; }
+    #rosterCard.collapsed .card-title { margin-bottom:0; border-bottom:none; padding-bottom:0; }
+    .roster-empty { color:var(--text-sub); font-size:.9rem; padding:6px 2px; }
+</style>
+<script>
+(function () {
+    let selectedName = '';
+
+    function collect() {
+        const map = new Map();
+        (db || []).forEach(r => {
+            const n = String(r[COL.NAME] || '').trim();
+            if (!n) return;
+            if (!map.has(n)) map.set(n, []);
+            map.get(n).push(r);
+        });
+        return Array.from(map, ([name, recs]) => {
+            const dates = recs.map(r => cleanDateStr(r[COL.DATE])).filter(Boolean).sort();
+            const last = recs[recs.length - 1];
+            return { name: name, count: recs.length, lastDate: dates.length ? dates[dates.length - 1] : '', info: last };
+        });
+    }
+
+    window.renderCaseRoster = function () {
+        const box = document.getElementById('rosterList');
+        if (!box) return;
+        const sortSel = document.getElementById('rosterSort');
+        const input = document.getElementById('searchName');
+        const typed = input ? input.value.trim() : '';
+        const query = (typed && typed !== selectedName) ? typed : '';
+
+        let list = collect();
+        const total = list.length;
+        if (query) list = list.filter(x => x.name.includes(query));
+        if (sortSel && sortSel.value === 'name') list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+        else list.sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || '') || a.name.localeCompare(b.name, 'ko'));
+
+        const cnt = document.getElementById('rosterCount');
+        const card = document.getElementById('rosterCard');
+        const collapsed = !!(card && card.classList.contains('collapsed'));
+        if (cnt) cnt.textContent = (collapsed && selectedName) ? `· 선택: ${selectedName}`
+            : (query ? `(${list.length} / 총 ${total}명)` : `(총 ${total}명)`);
+
+        if (!list.length) {
+            box.innerHTML = `<div class="roster-empty">${total ? '일치하는 내담자가 없습니다.' : '불러온 상담 기록이 없습니다.'}</div>`;
+            return;
+        }
+
+        box.innerHTML = list.map(x => {
+            const i = x.info;
+            const school = i[COL.SCHOOL] ? String(i[COL.SCHOOL]) : '';
+            const grade = i[COL.GRADE] ? formatGradeDisplay(i[COL.GRADE]) : '';
+            const cls = i[COL.CLASS_NUM] ? `${i[COL.CLASS_NUM]}반` : '';
+            const line1 = [school, grade, cls].filter(Boolean).join(' ');
+            const last = x.lastDate ? x.lastDate.slice(5).replace('-', '/') : '-';
+            const card = (typeof hasCareCard === 'function' && hasCareCard(x.name)) ? ' · 📇' : '';
+            return `<button type="button" class="roster-item ${x.name === selectedName ? 'active' : ''}" data-name="${escapeHtml(x.name)}">
+                <div class="roster-name">${escapeHtml(x.name)}${i[COL.GENDER] ? ` <span style="font-weight:600; color:var(--text-sub); font-size:.8rem;">(${escapeHtml(i[COL.GENDER])})</span>` : ''}</div>
+                <div class="roster-sub">${escapeHtml(line1 || '-')}<br>사례 ${escapeHtml(i[COL.CASE_NUM] || '-')} · ${x.count}회기 · 최근 ${last}${card}</div>
+            </button>`;
+        }).join('');
+    };
+
+    function setCollapsed(b) {
+        const card = document.getElementById('rosterCard');
+        const tg = document.getElementById('rosterToggle');
+        if (!card) return;
+        card.classList.toggle('collapsed', b);
+        if (tg) tg.textContent = b ? '▼ 명단 펼치기' : '▲ 접기';
+        renderCaseRoster();
+    }
+    window.toggleRoster = function () {
+        const card = document.getElementById('rosterCard');
+        setCollapsed(!(card && card.classList.contains('collapsed')));
+    };
+
+    // 내담자를 조회하면(명단 클릭 · 이름 입력 후 조회) 명단을 접어서 상담 기록이 바로 보이게 함
+    const _origSearch = window.searchHistory;
+    if (typeof _origSearch === 'function') {
+        window.searchHistory = function (targetName) {
+            const ret = _origSearch.apply(this, arguments);
+            const inp = document.getElementById('searchName');
+            const n = String(targetName || (inp ? inp.value : '') || '').trim();
+            if (n && (db || []).some(r => r[COL.NAME] === n)) {
+                selectedName = n;
+                setCollapsed(true);
+            }
+            return ret;
+        };
+    }
+
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest && e.target.closest('.roster-item');
+        if (!btn) return;
+        const name = btn.getAttribute('data-name');
+        selectedName = name;
+        const input = document.getElementById('searchName');
+        if (input) input.value = name;
+        searchHistory(name);
+        renderCaseRoster();
+        const t = document.getElementById('historyTarget');
+        if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    const nameInput = document.getElementById('searchName');
+    if (nameInput) nameInput.addEventListener('input', renderCaseRoster);
+})();
+</script>
+<!-- ===== /사례관리 내담자 명단 ===== -->
+
+<!-- ===== 상담 동의서(스캔본) 업로드 (추가 기능) ===== -->
+<style>
+    .consent-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+    .consent-slot { border:1.5px dashed #bfe0c8; border-radius:12px; padding:14px; background:#fbfdfb; }
+    .consent-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:.95rem; }
+    .consent-badge { font-size:.72rem; font-weight:800; padding:3px 9px; border-radius:999px; }
+    .consent-badge.ok { background:#dcfce7; color:#166534; }
+    .consent-badge.no { background:#fee2e2; color:#991b1b; }
+    .consent-files { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; min-height:26px; align-items:center; }
+    .consent-chip { display:inline-flex; align-items:center; gap:4px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:4px 4px 4px 9px; font-size:.78rem; }
+    .consent-chip a { color:var(--primary-dark); text-decoration:none; font-weight:700; }
+    .consent-chip button { border:none; background:#f1f5f9; color:#64748b; border-radius:6px; cursor:pointer; padding:2px 7px; font-size:.75rem; }
+    .consent-chip button:hover { background:#fee2e2; color:#991b1b; }
+    .consent-up { display:flex; gap:8px; align-items:center; }
+    .consent-msg { font-size:.78rem; color:var(--text-sub); margin-top:8px; min-height:16px; }
+</style>
+<script>
+(function () {
+    const TAGS = { student: '[학생동의서]', parent: '[학부모동의서]' };
+    const LABEL = { student: '학생용', parent: '학부모용' };
+    const MAX_BYTES = 10 * 1024 * 1024;
+    let curName = '';
+    let lists = { student: [], parent: [] };
+    let busy = false;
+
+    function kindOf(n) {
+        n = String(n || '');
+        if (n.includes(TAGS.student)) return 'student';
+        if (n.includes(TAGS.parent)) return 'parent';
+        return '';
+    }
+    function cleanName(n) { return String(n || '').replace(TAGS.student, '').replace(TAGS.parent, '').trim() || '동의서'; }
+    function clientRecs(name) {
+        return db.filter(r => r[COL.NAME] === name).sort((a, b) => {
+            const ta = getRecordDateTimeMs(a), tb = getRecordDateTimeMs(b);
+            if (ta !== tb) return ta - tb;
+            return Number(a.rowNum || 0) - Number(b.rowNum || 0);
+        });
+    }
+    function sameItem(a, b) {
+        if (a.fileId && b.fileId) return a.fileId === b.fileId;
+        if (a.url && b.url) return a.url === b.url;
+        return a.name === b.name;
+    }
+
+    window.isConsentFile = function (n) { return !!kindOf(n); };
+    window.getConsentFiles = function (name) {
+        const out = { student: [], parent: [] };
+        clientRecs(name).forEach(r => {
+            safeParseAttachments(r[COL.ATTACHMENTS]).forEach(it => {
+                const k = kindOf(it.name);
+                if (k) out[k].push({ item: it, rec: r });
+            });
+        });
+        return out;
+    };
+
+    function identityOf(r) {
+        return {
+            name: r[COL.NAME] || '', school: r[COL.SCHOOL] || '', grade: r[COL.GRADE] || '', classNum: r[COL.CLASS_NUM] || '',
+            gender: r[COL.GENDER] || '남', birth: r[COL.BIRTH] || '', phone: r[COL.PHONE] || '',
+            parentPhone: r[COL.PARENT_PHONE] || '', caseNum: r[COL.CASE_NUM] || ''
+        };
+    }
+    async function postUpdate(payload) {
+        const res = await fetch(scriptURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const j = await res.json();
+        if (!j || !j.success) throw new Error((j && j.message) || '저장 중 오류가 발생했습니다.');
+    }
+    function setMsg(kind, text) {
+        const el = document.getElementById('consentMsg_' + kind);
+        if (el) el.textContent = text || '';
+    }
+    function setBusy(b) {
+        busy = b;
+        document.querySelectorAll('#consentCard button').forEach(x => { x.disabled = b; });
+    }
+    async function reload() {
+        const p = loadData();
+        if (p && p.then) await p;
+        searchHistory(curName);
+    }
+
+    function slotHtml(kind) {
+        const arr = lists[kind];
+        const chips = arr.length
+            ? arr.map((x, i) => {
+                const nm = escapeHtml(cleanName(x.item.name));
+                const label = x.item.url ? `<a href="${escapeHtml(x.item.url)}" target="_blank">📎 ${nm}</a>` : `📎 ${nm}`;
+                return `<span class="consent-chip">${label}<button type="button" data-rm="${kind}:${i}" title="목록에서 삭제">✕</button></span>`;
+            }).join('')
+            : '<span style="color:var(--text-sub); font-size:.8rem;">아직 업로드된 파일이 없습니다.</span>';
+        return `
+        <div class="consent-slot">
+            <div class="consent-head"><b>${LABEL[kind]} 상담 동의서</b>
+                <span class="consent-badge ${arr.length ? 'ok' : 'no'}">${arr.length ? '제출 완료' : '미제출'}</span></div>
+            <div class="consent-files">${chips}</div>
+            <div class="consent-up">
+                <input type="file" id="consentFile_${kind}" accept="image/*,.pdf" multiple style="padding:8px; height:auto; flex:1; min-width:0;">
+                <button type="button" class="btn" data-up="${kind}" style="background:var(--primary); color:#fff; padding:9px 14px; white-space:nowrap;">⬆️ 업로드</button>
+            </div>
+            <div class="consent-msg" id="consentMsg_${kind}"></div>
+        </div>`;
+    }
+
+    window.renderConsentCard = function (name) {
+        curName = name;
+        lists = getConsentFiles(name);
+        const old = document.getElementById('consentCard');
+        if (old) old.remove();
+        const box = document.querySelector('#historyTarget .info-box');
+        if (!box) return;
+        box.insertAdjacentHTML('afterend', `
+        <div class="card no-print" id="consentCard" style="margin-top:14px;">
+            <div class="card-title">📄 상담 동의서 (스캔본)
+                <span style="font-size:.75rem; font-weight:600; color:var(--text-sub);">사진·PDF 가능 · 여러 장 선택 가능</span></div>
+            <div class="consent-grid">${slotHtml('student')}${slotHtml('parent')}</div>
+        </div>`);
+        const card = document.getElementById('consentCard');
+        card.addEventListener('click', function (e) {
+            if (busy) return;
+            const up = e.target.closest('[data-up]');
+            if (up) { uploadConsent(up.getAttribute('data-up')); return; }
+            const rm = e.target.closest('[data-rm]');
+            if (rm) { const [k, i] = rm.getAttribute('data-rm').split(':'); removeConsent(k, Number(i)); }
+        });
+    };
+
+    async function uploadConsent(kind) {
+        const input = document.getElementById('consentFile_' + kind);
+        const files = Array.from((input && input.files) || []);
+        if (!files.length) { setMsg(kind, '업로드할 파일을 먼저 선택해주세요.'); return; }
+        if (files.reduce((s, f) => s + f.size, 0) > MAX_BYTES) {
+            setMsg(kind, '용량이 너무 큽니다(합계 10MB 이하). 스캔 해상도를 낮추거나 나눠서 올려주세요.');
+            return;
+        }
+        const recs = clientRecs(curName);
+        if (!recs.length) return;
+        setBusy(true);
+        setMsg(kind, '업로드 중... 잠시만 기다려주세요.');
+        try {
+            const target = recs[0];
+            const b64 = await Promise.all(files.map(readFileAsBase64));
+            b64.forEach(f => { if (!f.name.includes(TAGS[kind])) f.name = `${TAGS[kind]} ${f.name}`; });
+            const payload = buildClientInfoUpdatePayload(target, identityOf(target));
+            payload.attachments = b64;
+            await postUpdate(payload);
+            await reload();
+        } catch (err) {
+            console.error('동의서 업로드 오류:', err);
+            setMsg(kind, '⚠️ 업로드 실패: ' + (err.message || err));
+            setBusy(false);
+        }
+    }
+
+    async function removeConsent(kind, i) {
+        const x = lists[kind][i];
+        if (!x) return;
+        if (!confirm(`"${cleanName(x.item.name)}" 파일을 동의서 목록에서 삭제할까요?\n(구글 드라이브의 원본 파일은 그대로 남아 있을 수 있습니다.)`)) return;
+        setBusy(true);
+        try {
+            const remaining = safeParseAttachments(x.rec[COL.ATTACHMENTS]).filter(it => !sameItem(it, x.item));
+            const payload = buildClientInfoUpdatePayload(x.rec, identityOf(x.rec));
+            payload.existingAttachments = JSON.stringify(remaining);
+            payload.attachments = [];
+            await postUpdate(payload);
+            await reload();
+        } catch (err) {
+            console.error('동의서 삭제 오류:', err);
+            setMsg(kind, '⚠️ 삭제 실패: ' + (err.message || err));
+            setBusy(false);
+        }
+    }
+
+    // 조회가 끝날 때마다 동의서 카드를 인적사항 아래에 붙임
+    const prev = window.searchHistory;
+    if (typeof prev === 'function') {
+        window.searchHistory = function (targetName) {
+            const ret = prev.apply(this, arguments);
+            const inp = document.getElementById('searchName');
+            const n = String(targetName || (inp ? inp.value : '') || '').trim();
+            if (n && (db || []).some(r => r[COL.NAME] === n)) {
+                renderConsentCard(n);
+                busy = false;
+            }
+            return ret;
+        };
+    }
+})();
+</script>
+<!-- ===== /상담 동의서(스캔본) 업로드 ===== -->
+
+<div class="copyright">© 2026 Hyun. All rights reserved.</div>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
